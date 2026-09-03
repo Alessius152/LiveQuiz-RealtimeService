@@ -1,0 +1,24 @@
+
+name: livequiz_realtimeservice_cluster
+
+services:
+
+    livequiz-realtimeservice-backend-1:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: livequiz_realtimeservice_backend
+        container_name: livequiz-realtimeservice-backend-1
+        environment:
+            - SERVER_HOST=0.0.0.0
+            - SERVER_PORT=3000
+        command: sh -c "sleep 5 && node dist/server.js"
+        networks:
+            - livequiz-realtimeservice-net
+            - livequiz-messagebrokers-net
+
+networks:
+    livequiz-realtimeservice-net:
+        external: true
+    livequiz-messagebrokers-net:
+        external: true
