@@ -1,6 +1,6 @@
-import { saveQuiz } from "../../quizzes-cache/manipulation.js"
-import { CreatedQuizEvent } from "../../types/kafka-events.js"
-import { ParsedCreatedQuizEventPayload } from "../../types/realtime-room.js"
+import { saveQuiz } from "../temporarly-database/quizzes-cache.js"
+import { CreatedQuizEvent } from "../types/kafka-events.js"
+import { ParsedCreatedQuizEventPayload } from "../types/realtime-room.js"
 
 const parseQuestionsIndexing: (indexing: CreatedQuizEvent['indexing']) => ParsedCreatedQuizEventPayload['questions'] = (indexing) => {
 

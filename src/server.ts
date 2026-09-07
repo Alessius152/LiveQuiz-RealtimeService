@@ -1,7 +1,8 @@
 
 import Fastify from 'fastify'
-import { testCluster } from './redis/config.js'
-import { connectKafka } from './kafka/config.js'
+import { testCluster } from './config/redis.js'
+import { connectKafka } from './config/kafka.js'
+import { roomsRouter } from './routers/rooms.js'
 
 const server = Fastify({ logger: true })
 
@@ -15,7 +16,9 @@ const start = async () => {
     }
 }
 
-(async ()=>{
+(async () => {
+    server.register(roomsRouter, { prefix: '/room' })
+
     await testCluster()
     await connectKafka()
     await start()

@@ -1,7 +1,7 @@
 
 import { Kafka } from 'kafkajs'
 import os from 'os'
-import { handleKafkaEvent } from './handlers/topic-router.js'
+import { handleKafkaEvent } from '../broker-handlers/topic-router.js'
 
 const kafka = new Kafka({
     clientId: os.hostname(),

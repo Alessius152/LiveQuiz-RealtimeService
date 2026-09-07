@@ -1,8 +1,7 @@
 
 import { EachMessagePayload } from "kafkajs"
-import { CreatedQuizEvent } from "../../types/kafka-events.js"
-
-import quizTopicHandlers from '../handlers/quiz-topic.js'
+import { CreatedQuizEvent } from "../types/kafka-events.js"
+import quizTopicHandlers from './quiz-topic.js'
 
 const handleKafkaEvent = ({ topic, partition, message }: EachMessagePayload) => {
 
@@ -18,7 +17,6 @@ const handleKafkaEvent = ({ topic, partition, message }: EachMessagePayload) => 
     if (topic === 'quiz-topic') {
         if (eventName === 'QuizCreatedEvent') {
             const parsed = JSON.parse(value.toString()) as CreatedQuizEvent
-            console.log("<-:::parsed:::->", parsed)
             quizTopicHandlers.onCreateQuizEvent(parsed)
         }
     }

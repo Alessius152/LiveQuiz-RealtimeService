@@ -9,6 +9,8 @@ services:
             dockerfile: Dockerfile
         image: livequiz_realtimeservice_backend
         container_name: livequiz-realtimeservice-backend-1
+        ports: 
+            - "3001:3000"
         environment:
             - SERVER_HOST=0.0.0.0
             - SERVER_PORT=3000
