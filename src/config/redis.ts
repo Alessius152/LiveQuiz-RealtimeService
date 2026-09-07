@@ -9,9 +9,17 @@ const redisCluster = new Redis.Cluster([
     { host: '172.32.0.15', port: 6379 },
     { host: '172.32.0.16', port: 6379 },
 ], {
+    natMap: {
+      '172.32.0.11': { host: '172.32.0.11', port: 6379 },
+      '172.32.0.12': { host: '172.32.0.12', port: 6379 },
+      '172.32.0.13': { host: '172.32.0.13', port: 6379 },
+      '172.32.0.14': { host: '172.32.0.14', port: 6379 },
+      '172.32.0.15': { host: '172.32.0.15', port: 6379 },
+      '172.32.0.16': { host: '172.32.0.16', port: 6379 },
+    },
     clusterRetryStrategy: (times) => Math.min(100 * times, 2000),
     enableReadyCheck: true,
-    scaleReads: 'slave'
+    scaleReads: 'slave',
 })
 
 redisCluster.on('connect', () => {

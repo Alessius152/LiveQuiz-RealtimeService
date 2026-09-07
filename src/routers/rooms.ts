@@ -1,5 +1,4 @@
 
-
 import { FastifyPluginAsync } from "fastify"
 import { createRoomSchema } from "../schemas/rooms.js"
 import { createRoomController } from "../controllers/rooms/createRoomController.js"

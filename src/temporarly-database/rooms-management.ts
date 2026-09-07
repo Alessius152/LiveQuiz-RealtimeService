@@ -10,10 +10,17 @@ const loadNewRoom: (quizId: string) => Promise<RealtimeRoomStatus> = async (quiz
 
         const code = Math.floor(Math.random() * 900000) + 100000
         const key = `room:${code}`
-        const result = await redisCluster.set(key, quizId, 'EX', 7200, 'NX')
+        const roomStatus: RealtimeRoomStatus = { code, status: 'waiting', players: [] }
+        const result = await redisCluster.call(
+            'JSON.SET', 
+            key, 
+            '$', 
+            JSON.stringify(roomStatus), 
+            'NX'
+        )
 
         if (result === 'OK') {
-            return { code, status: 'waiting', players: [] }
+            return roomStatus
         }
 
         attempts++
