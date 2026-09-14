@@ -3,6 +3,7 @@ const ADD_PLAYER_SCRIPT = `
 local room = KEYS[1]
 local username = ARGV[1]
 local socketId = ARGV[2]
+local playerId = ARGV[3]
 
 if redis.call("exists", room) == 0 then
     return nil
@@ -36,7 +37,7 @@ for suffix = 0, 3 do
     end
 
     if not found then
-        redis.call("json.arrappend", room, ".players", cjson.encode({username = candidate, socketId = socketId}))
+        redis.call("json.arrappend", room, ".players", cjson.encode({username = candidate, socketId = socketId, playerId = playerId}))
         return candidate
     end
 end

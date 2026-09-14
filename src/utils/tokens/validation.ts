@@ -1,21 +1,21 @@
 import { createHmac } from "node:crypto"
-import { hostTokenSecret } from "./keys.js"
-import { HostTokenValidationError, RoomHostTokenPayload } from "./types.js"
+import { hostTokenSecret, playerTokenSecret } from "./keys.js"
+import { AppTokenValidationError, RoomHostTokenPayload, RoomPlayerTokenPayload } from "./types.js"
 
-const verifyHostToken = (token: string): HostTokenValidationError | RoomHostTokenPayload => {
+const verifyHostToken = (token: string): AppTokenValidationError | RoomHostTokenPayload => {
     const [encodedPayload, receivedSignature] = token.split('.')
     if (!(encodedPayload.trim() && receivedSignature.trim())) {
-        return HostTokenValidationError.INVALID_STRUCTURE
+        return AppTokenValidationError.INVALID_STRUCTURE
     }
 
     const expectedSignature = createHmac('sha256', hostTokenSecret).update(encodedPayload).digest('base64url')
-    if(receivedSignature !== expectedSignature){
-        return HostTokenValidationError.INVALID_SIGNATURE
+    if (receivedSignature !== expectedSignature) {
+        return AppTokenValidationError.INVALID_SIGNATURE
     }
 
     const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString()) as RoomHostTokenPayload
     // if(payload.type !== "host"){
-    //     return HostTokenValidationError.IS_NOT_HOST_TOKEN
+    //     return AppTokenValidationError.IS_NOT_HOST_TOKEN
     // } 
     /*dal momento che ogni token che firmo con il secret HOST_TOKEN_SECRET, ha il payload ha la proprietà type
     che riceve l'unico possibile valore di "host", qui non c'è bisogno di verificare l'uguaglianza tra i due,
@@ -23,19 +23,47 @@ const verifyHostToken = (token: string): HostTokenValidationError | RoomHostToke
 
     const currentTime = Math.floor(Date.now() / 1000)
     if (payload.exp < currentTime) {
-        return HostTokenValidationError.TOKEN_HAS_EXPIRED
+        return AppTokenValidationError.TOKEN_HAS_EXPIRED
     }
 
-    return payload 
+    return payload
 }
 
 const isHostTokenValidationError = (
-    value: HostTokenValidationError | RoomHostTokenPayload
-): value is HostTokenValidationError => {
+    value: AppTokenValidationError | RoomHostTokenPayload
+): value is AppTokenValidationError => {
+    return typeof value === 'number'
+}
+
+const verifyPlayerToken = (token: string): AppTokenValidationError | RoomPlayerTokenPayload => {
+    const [encodedPayload, receivedSignature] = token.split('.')
+    if (!(encodedPayload.trim() && receivedSignature.trim())) {
+        return AppTokenValidationError.INVALID_STRUCTURE
+    }
+
+    const expectedSignature = createHmac("sha256", playerTokenSecret).update(encodedPayload).digest("base64url")
+    if (receivedSignature !== expectedSignature) {
+        return AppTokenValidationError.INVALID_SIGNATURE
+    }
+
+    const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString()) as RoomPlayerTokenPayload
+    const currentTime = Math.floor(Date.now() / 1000)
+    if (payload.exp < currentTime) {
+        return AppTokenValidationError.TOKEN_HAS_EXPIRED
+    }
+
+    return payload
+}
+
+const isPlayerTokenValidationError = (
+    value: AppTokenValidationError | RoomPlayerTokenPayload
+): value is AppTokenValidationError => {
     return typeof value === 'number'
 }
 
 export {
     verifyHostToken,
     isHostTokenValidationError,
+    verifyPlayerToken,
+    isPlayerTokenValidationError
 }

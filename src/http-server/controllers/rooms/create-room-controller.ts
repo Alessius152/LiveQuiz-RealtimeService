@@ -16,7 +16,13 @@ const createRoomController: RouteHandlerMethod = async (request, reply) => {
             return reply.status(HttpStatusCode.NOT_FOUND).send({})
         }
 
-        const { code } = await loadNewRoom(quizId)
+        const response = await loadNewRoom(quizId)
+
+        if (response === "QUIZ_SNAPSHOT_NOT_FOUND") {
+            return reply.status(HttpStatusCode.NOT_FOUND).send({ error: "unexistant_quiz" })
+        }
+
+        const { code } = response
         const hostToken = createHostToken(code)
 
         return reply.status(HttpStatusCode.CREATED).send({ code, hostToken })

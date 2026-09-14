@@ -1,11 +1,22 @@
 import { redisCluster } from "../config/redis.js"
+import { ParsedCreatedQuizEventPayload } from "../types/quizzes-storage.js"
 import { PlayerJoinInput, RealtimeRoomStatus } from "../types/realtime-room.js"
 import ADD_PLAYER_SCRIPT from "./lua-scripts/add-player.js"
 import DISCONNECT_PLAYER_SCRIPT from "./lua-scripts/disconnect-player.js"
+import HANDLE_PLAYER_RECONNECTION_SCRIPT from "./lua-scripts/handle-player-reconnection.js"
 import SET_ROOM_STATUS_AS_RUNNING_SCRIPT from "./lua-scripts/set-room-status-as-running.js"
-import { roomKey } from "./redis-keys-generators.js"
+import { quizKey, roomKey } from "./redis-keys-generators.js"
 
-const loadNewRoom: (quizId: string) => Promise<RealtimeRoomStatus> = async (quizId) => {
+const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | RealtimeRoomStatus> = async (quizId) => {
+
+    const qKey = quizKey(quizId)
+    const qSnapshot = (await redisCluster.call("json.get", qKey, "$")) as string | null
+
+    if (!qSnapshot) {
+        return "QUIZ_SNAPSHOT_NOT_FOUND"
+    }
+
+    const parsedSnapshot = JSON.parse(qSnapshot)[0] as ParsedCreatedQuizEventPayload
 
     const maxAttempts = 10
     let attempts = 0
@@ -14,7 +25,8 @@ const loadNewRoom: (quizId: string) => Promise<RealtimeRoomStatus> = async (quiz
 
         const code = `${Math.floor(Math.random() * 900000) + 100000}`
         const key = roomKey(code)
-        const roomStatus: RealtimeRoomStatus = { quizId, code, status: 'waiting', players: [] }
+
+        const roomStatus: RealtimeRoomStatus = { immutableQuizSnapshot: parsedSnapshot.questions, code, status: 'waiting', players: [] }
         const result = await redisCluster.call("json.set", key, "$", JSON.stringify(roomStatus), "NX")
 
         if (result === 'OK') {
@@ -56,16 +68,20 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 
 }
 
-const addPlayer = async (room: string, player: PlayerJoinInput) => {
-    return await redisCluster.eval(ADD_PLAYER_SCRIPT, 1, roomKey(room), player.username, player.socket)
+const addPlayer = async (room: string, player: PlayerJoinInput): Promise<null | "ALREADY_JOINED" | "MAX_CANDIDATES" | string> => {
+    return await redisCluster.eval(ADD_PLAYER_SCRIPT, 1, roomKey(room), player.username, player.socket, player.playerId) as any
 }
 
-const disconnectPlayer = async (room: string, username: string, socket: string) => {
-    return await redisCluster.eval(DISCONNECT_PLAYER_SCRIPT, 1, roomKey(room), username, socket)
+const disconnectPlayer = async (room: string, username: string, socket: string): Promise<0 | 1> => {
+    return await redisCluster.eval(DISCONNECT_PLAYER_SCRIPT, 1, roomKey(room), username, socket) as any
 }
 
-const setRoomStatusAsRunning = async (room: string) => {
-    return await redisCluster.eval(SET_ROOM_STATUS_AS_RUNNING_SCRIPT, 1, roomKey(room))
+const setRoomStatusAsRunning = async (room: string): Promise<"ROOM_NOT_FOUND" | "ALREADY_RUNNING" | "OK"> => {
+    return await redisCluster.eval(SET_ROOM_STATUS_AS_RUNNING_SCRIPT, 1, roomKey(room)) as any
+}
+
+const resetPlayerByReconnection = async (room: string, playerId: string, socketId: string): Promise<null | "PLAYER_ALREADY_CONNECTED" | "PLAYERID_NOT_FOUND" | string> => {
+    return await redisCluster.eval(HANDLE_PLAYER_RECONNECTION_SCRIPT, 1, roomKey(room), playerId, socketId) as any
 }
 
 export {
@@ -74,5 +90,6 @@ export {
     getRoom,
     addPlayer,
     disconnectPlayer,
-    setRoomStatusAsRunning
+    setRoomStatusAsRunning,
+    resetPlayerByReconnection,
 }

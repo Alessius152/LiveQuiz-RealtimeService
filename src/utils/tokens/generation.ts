@@ -1,6 +1,8 @@
 
-import { createHmac } from 'node:crypto'
-import { hostTokenSecret } from './keys.js'
+import { createHmac, Hmac } from 'node:crypto'
+import { hostTokenSecret, playerTokenSecret } from './keys.js'
+
+const appToken = (ePayload: string, signature: string) => `${ePayload}.${signature}`
 
 const createHostToken = (room: string) => {
     const payload = {
@@ -18,11 +20,25 @@ const createHostToken = (room: string) => {
 
     const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url")
     const signature = createHmac("sha256", hostTokenSecret).update(encodedPayload).digest("base64url")
-    const token = `${encodedPayload}.${signature}`
 
-    return token
+    return appToken(encodedPayload, signature)
+}
+
+const createPlayerToken = (room: string, username: string, playerId: string, gameExp: number) => {
+    const payload = {
+        room,
+        username,
+        playerId,
+        exp: gameExp
+    }
+
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url")
+    const signature = createHmac("sha256", playerTokenSecret).update(encodedPayload).digest("base64url")
+
+    return appToken(encodedPayload, signature)
 }
 
 export {
     createHostToken,
+    createPlayerToken,
 }

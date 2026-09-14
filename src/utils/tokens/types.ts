@@ -1,5 +1,5 @@
 
-enum HostTokenValidationError {
+enum AppTokenValidationError {
     INVALID_STRUCTURE,
     INVALID_SIGNATURE,
     IS_NOT_HOST_TOKEN,
@@ -12,10 +12,18 @@ type RoomHostTokenPayload = {
     exp: number
 }
 
+type RoomPlayerTokenPayload = {
+    room: string,
+    username: string,
+    playerId: string,
+    exp: number
+}
+
 export {
-    HostTokenValidationError
+    AppTokenValidationError
 }
 
 export type {
-    RoomHostTokenPayload
+    RoomHostTokenPayload,
+    RoomPlayerTokenPayload,
 }

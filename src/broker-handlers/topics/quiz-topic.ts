@@ -1,13 +1,16 @@
 import { saveQuiz } from "../../temporarly-database/quizzes-cache.js"
 import { CreatedQuizEvent } from "../../types/kafka-events.js"
-import { ParsedCreatedQuizEventPayload } from "../../types/quizzes-storage.js"
+import { ParsedCreatedQuizEventPayload, QuestionContent } from "../../types/quizzes-storage.js"
 
-const parseQuestionsIndexing: (indexing: CreatedQuizEvent['indexing']) => ParsedCreatedQuizEventPayload['questions'] = (indexing) => {
+const parseQuestionsIndexing = (
+    indexing: CreatedQuizEvent['indexing']
+): ParsedCreatedQuizEventPayload['questions'] => {
 
-    const parsed: ParsedCreatedQuizEventPayload['questions'] = []
+    const parsed: ParsedCreatedQuizEventPayload['questions'] = {}
 
     for (const { qI, a: answers, o: options, t: type } of indexing) {
-        const obj: { type: number, options?: Array<number>, answers?: Array<number> } = { type }
+        const obj: QuestionContent = { type }
+
         if (type === 0) {
             obj.answers = answers
         }
@@ -15,7 +18,8 @@ const parseQuestionsIndexing: (indexing: CreatedQuizEvent['indexing']) => Parsed
             obj.options = options
             obj.answers = answers
         }
-        parsed.push(qI, JSON.stringify(obj))
+
+        parsed[qI] = obj
     }
 
     return parsed
