@@ -1,7 +1,7 @@
 
 import { EachMessagePayload } from "kafkajs"
 import { CreatedQuizEvent } from "../types/kafka-events.js"
-import quizTopicHandlers from './quiz-topic.js'
+import quizTopicHandlers from './topics/quiz-topic.js'
 
 const handleKafkaEvent = ({ topic, partition, message }: EachMessagePayload) => {
 

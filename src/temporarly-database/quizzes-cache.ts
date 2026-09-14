@@ -1,17 +1,14 @@
 
 import { redisCluster } from "../config/redis.js"
-import { CachedExistantQuiz } from "../types/realtime-room.js"
+import { CachedExistantQuiz } from "../types/quizzes-storage.js"
+import { quizKey } from "./redis-keys-generators.js"
 
 const saveQuiz = (quizStruct: CachedExistantQuiz) => {
-
-    const key = `quiz:${quizStruct.quiz[1]}`
-    redisCluster.hset(key, ...['creatorId', quizStruct.quiz[0], ...quizStruct.questions])
-
+    redisCluster.hset(quizKey(quizStruct.quiz[1]), ...['creatorId', quizStruct.quiz[0], ...quizStruct.questions])
 }
 
 const checkQuizExists = async (quizId: string): Promise<boolean> => {
-    const key = `quiz:${quizId}`
-    const result = await redisCluster.exists(key)
+    const result = await redisCluster.exists(quizKey(quizId))
     return result === 1
 }
 

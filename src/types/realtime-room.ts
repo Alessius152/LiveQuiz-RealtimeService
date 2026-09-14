@@ -1,27 +1,19 @@
-import { CreatedQuizEvent } from "./kafka-events.js"
 
-type QuestionIndex = number
-type QuestionContent = string /* { type: 0 | 1 | 2, options: Array<number>, answers: Array<number> } */
+type PlayerJoinInput = { username: string, socket: string } /*questo type si usa quando un utente deve entrare in una stanza
+e quindi servono solo i dati necessari affinché venga inizializzato*/
 
-type ParsedCreatedQuizEventPayload = {
-    quiz: CreatedQuizEvent['quiz'],
-    questions: Array<QuestionIndex | QuestionContent>
-}
-
-type CachedExistantQuiz = ParsedCreatedQuizEventPayload
-
-type RoomPlayer = {
-    username: string
+type PlayerStatus = {
+    username: string,
 }
 
 type RealtimeRoomStatus = {
-    code: number,
+    code: string,
+    quizId: string,
     status: 'waiting' | 'running',
-    players: Array<RoomPlayer>
+    players: Array<PlayerStatus>
 }
 
 export type {
-    ParsedCreatedQuizEventPayload,
-    CachedExistantQuiz,
     RealtimeRoomStatus,
+    PlayerJoinInput
 }

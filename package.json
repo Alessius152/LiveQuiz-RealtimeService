@@ -2,10 +2,10 @@
   "name": "realtime-service",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/http-server/server.js",
   "scripts": {
-    "start": "pnpm tsc && node --env-file=.env dist/server.js",
-    "dockerfile_start": "node dist/server.js"
+    "start": "pnpm tsc && node --env-file=.env dist/http-server/server.js",
+    "dockerfile_start": "node dist/http-server/server.js"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +24,8 @@
     "ioredis": "^6.0.0",
     "kafkajs": "^2.2.4",
     "socket.io": "^4.8.3",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^26.4.0"

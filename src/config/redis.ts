@@ -1,25 +1,16 @@
-
 import Redis from 'ioredis'
 
 const redisCluster = new Redis.Cluster([
-    { host: '172.32.0.11', port: 6379 },
-    { host: '172.32.0.12', port: 6379 },
-    { host: '172.32.0.13', port: 6379 },
-    { host: '172.32.0.14', port: 6379 },
-    { host: '172.32.0.15', port: 6379 },
-    { host: '172.32.0.16', port: 6379 },
+    { host: 'livequiz-RTservice-rediscluster-1', port: 6379 },
+    { host: 'livequiz-RTservice-rediscluster-2', port: 6379 },
+    { host: 'livequiz-RTservice-rediscluster-3', port: 6379 },
+    { host: 'livequiz-RTservice-rediscluster-4', port: 6379 },
+    { host: 'livequiz-RTservice-rediscluster-5', port: 6379 },
+    { host: 'livequiz-RTservice-rediscluster-6', port: 6379 },
 ], {
-    natMap: {
-      '172.32.0.11': { host: '172.32.0.11', port: 6379 },
-      '172.32.0.12': { host: '172.32.0.12', port: 6379 },
-      '172.32.0.13': { host: '172.32.0.13', port: 6379 },
-      '172.32.0.14': { host: '172.32.0.14', port: 6379 },
-      '172.32.0.15': { host: '172.32.0.15', port: 6379 },
-      '172.32.0.16': { host: '172.32.0.16', port: 6379 },
-    },
-    clusterRetryStrategy: (times) => Math.min(100 * times, 2000),
-    enableReadyCheck: true,
+    clusterRetryStrategy: (times) => Math.min(times * 100, 3000),
     scaleReads: 'slave',
+    shardedSubscribers: true
 })
 
 redisCluster.on('connect', () => {
@@ -34,7 +25,6 @@ async function testCluster() {
     try {
         await redisCluster.set('test_key', 'it works!')
         const val = await redisCluster.get('test_key')
-
         console.log("redis cluster: test passed", val)
     } catch (error) {
         console.error("error during the redis cluster test", error)
@@ -45,3 +35,5 @@ export {
     redisCluster,
     testCluster,
 }
+
+// redis-cli --cluster call localhost:6379 keys '*' per avere tutte le chiavi del cluster

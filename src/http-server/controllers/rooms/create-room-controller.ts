@@ -1,8 +1,9 @@
 
 import { RouteHandlerMethod } from "fastify"
-import { HttpStatusCode } from "../../utils/enums/http-status-code.js"
-import { loadNewRoom } from "../../temporarly-database/rooms-management.js"
-import { checkQuizExists } from "../../temporarly-database/quizzes-cache.js"
+import { checkQuizExists } from "../../../temporarly-database/quizzes-cache.js"
+import { HttpStatusCode } from "../../../utils/enums/http-status-code.js"
+import { loadNewRoom } from "../../../temporarly-database/rooms-management.js"
+import { createHostToken } from "../../../utils/tokens/generation.js"
 
 const createRoomController: RouteHandlerMethod = async (request, reply) => {
 
@@ -16,7 +17,9 @@ const createRoomController: RouteHandlerMethod = async (request, reply) => {
         }
 
         const { code } = await loadNewRoom(quizId)
-        return reply.status(HttpStatusCode.CREATED).send({ code })
+        const hostToken = createHostToken(code)
+
+        return reply.status(HttpStatusCode.CREATED).send({ code, hostToken })
 
     }
     catch (err) {
