@@ -20,6 +20,20 @@ services:
         networks:
             - livequiz-realtimeservice-net
             - livequiz-messagebrokers-net
+        depends_on:
+            livequiz-realtimeservice-redis-bullmq:
+                condition: service_healthy
+
+    livequiz-realtimeservice-redis-bullmq:
+        image: redis:7
+        container_name: livequiz-realtimeservice-redis-bullmq
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
 
 networks:
     livequiz-realtimeservice-net:

@@ -2,7 +2,7 @@
 import { Socket } from "socket.io"
 import { joinRoomSchema } from "../schemas.js"
 import { addPlayer, resetPlayerByReconnection } from "../../temporarly-database/rooms-management.js"
-import { socketIoRooms } from "../socket.io-keys-generators.js"
+import { socketIoEvents, socketIoRooms } from "../socket.io-keys-generators.js"
 import { createPlayerToken } from "../../utils/tokens/generation.js"
 import { uuidv7 } from "uuidv7"
 import { isPlayerTokenValidationError, verifyPlayerToken } from "../../utils/tokens/validation.js"
@@ -41,7 +41,7 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         const token = createPlayerToken(room, added, playerId, gameExpiration)
 
         socket.join(socketIoRooms.quizRoom(room))
-        socket.emit('recovery-token', { token })
+        socket.emit(socketIoEvents.RECOVERY_TOKEN, { token })
     }
     else {
         const tokenCheck = verifyPlayerToken(recoveryToken)

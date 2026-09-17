@@ -5,6 +5,7 @@ import { redisCluster } from '../config/redis.js'
 import { createShardedAdapter } from '@socket.io/redis-adapter'
 import { joinRoomController } from './controllers/join-room-controller.js'
 import { disconnectPlayer } from '../temporarly-database/rooms-management.js'
+import { socketIoEvents } from './socket.io-keys-generators.js'
 
 const startSocketServer = (fastify: FastifyInstance) => {
 
@@ -24,7 +25,7 @@ const startSocketServer = (fastify: FastifyInstance) => {
     io.on('connection', (socket) => {
         fastify.log.info(`[socket.io] connection - ${socket.id}`)
 
-        socket.on('join-room', (data) => joinRoomController(socket, data))
+        socket.on(socketIoEvents.JOIN_ROOM, (data) => joinRoomController(socket, data))
 
         socket.on('disconnect', async () => {
             fastify.log.info(`[socket.io] disconnection - ${socket.id}`)
