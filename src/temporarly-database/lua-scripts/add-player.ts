@@ -4,25 +4,27 @@ local room = KEYS[1]
 local username = ARGV[1]
 local socketId = ARGV[2]
 local playerId = ARGV[3]
+local roomDataJson = redis.call("json.get", room, "$.status", "$.players")
 
-if redis.call("exists", room) == 0 then
-    return nil
+if not roomDataJson then
+    return "ROOM_NOT_FOUND"
 end
 
-local playersJson = redis.call("json.get", room, "$.players[*]")
-local players = {}
+local roomData = cjson.decode(roomDataJson)
+local status = roomData["$.status"][1]
 
-if playersJson then
-    players = cjson.decode(playersJson)
+if status == "running" then
+    return "GAME_ALREADY_STARTED"
 end
 
+local players = roomData["$.players"][1]
 local candidate = username
 
 for suffix = 0, 3 do
     if suffix > 0 then
         candidate = username .. " (" .. suffix .. ")"
     end
-    
+
     local found = false
 
     for _, existingPlayer  in ipairs(players) do

@@ -2,7 +2,7 @@
 import Fastify from 'fastify'
 import { roomsRouter } from './routers/rooms.js'
 import { startSocketServer } from '../socket-server/server.js'
-import { testCluster } from '../config/redis.js'
+import { testCluster, waitForRedisClusterReady } from '../config/redis.js'
 import { connectKafka } from '../config/kafka.js'
 import { getIO, setIO } from '../global/ioInstance.js'
 
@@ -26,6 +26,7 @@ const start = async () => {
 }
 
 (async () => {
+    await waitForRedisClusterReady()
     await testCluster()
     await connectKafka()
     await start()

@@ -68,7 +68,12 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 
 }
 
-const addPlayer = async (room: string, player: PlayerJoinInput): Promise<null | "ALREADY_JOINED" | "MAX_CANDIDATES" | string> => {
+const addPlayer = async (room: string, player: PlayerJoinInput): Promise<
+    "ROOM_NOT_FOUND" |
+    "ALREADY_JOINED" |
+    "MAX_CANDIDATES" |
+    "GAME_ALREADY_STARTED"
+> => {
     return await redisCluster.eval(ADD_PLAYER_SCRIPT, 1, roomKey(room), player.username, player.socket, player.playerId) as any
 }
 
@@ -76,11 +81,20 @@ const disconnectPlayer = async (room: string, username: string, socket: string):
     return await redisCluster.eval(DISCONNECT_PLAYER_SCRIPT, 1, roomKey(room), username, socket) as any
 }
 
-const setRoomStatusAsRunning = async (room: string): Promise<"ROOM_NOT_FOUND" | "ALREADY_RUNNING" | "OK"> => {
+const setRoomStatusAsRunning = async (room: string): Promise<
+    "ROOM_NOT_FOUND" |
+    "ALREADY_RUNNING" |
+    "OK"
+> => {
     return await redisCluster.eval(SET_ROOM_STATUS_AS_RUNNING_SCRIPT, 1, roomKey(room)) as any
 }
 
-const resetPlayerByReconnection = async (room: string, playerId: string, socketId: string): Promise<null | "PLAYER_ALREADY_CONNECTED" | "PLAYERID_NOT_FOUND" | string> => {
+const resetPlayerByReconnection = async (room: string, playerId: string, socketId: string): Promise<
+    null |
+    "PLAYER_ALREADY_CONNECTED" |
+    "PLAYERID_NOT_FOUND" |
+    string
+> => {
     return await redisCluster.eval(HANDLE_PLAYER_RECONNECTION_SCRIPT, 1, roomKey(room), playerId, socketId) as any
 }
 

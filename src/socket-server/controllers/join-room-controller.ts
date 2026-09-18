@@ -8,7 +8,6 @@ import { uuidv7 } from "uuidv7"
 import { isPlayerTokenValidationError, verifyPlayerToken } from "../../utils/tokens/validation.js"
 
 const joinRoomController = async (socket: Socket, data: unknown) => {
-
     const validation = joinRoomSchema.safeParse(data)
 
     if (!validation.success) {
@@ -26,10 +25,9 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
 
         const added = await addPlayer(room, { username, socket: socket.id, playerId })
 
-        if ((added === null) || (added === "MAX_CANDIDATES") || (added === "ALREADY_JOINED")) {
+        if ((added === "ROOM_NOT_FOUND") || (added === "MAX_CANDIDATES") || (added === "ALREADY_JOINED") || (added === "GAME_ALREADY_STARTED")) {
             /*
             null = Stanza non trovata
-            MAX_CANDIDATES vuol dire che ci sono troppi utenti con lo stesso nome e suffisso calcolato
             */
             return
         }

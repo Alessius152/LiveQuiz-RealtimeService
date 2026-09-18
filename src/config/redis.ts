@@ -31,8 +31,20 @@ async function testCluster() {
     }
 }
 
+async function waitForRedisClusterReady() {
+    if (redisCluster.status === 'ready') {
+        return
+    }
+
+    await new Promise<void>((resolve, reject) => {
+        redisCluster.once('ready', resolve)
+        redisCluster.once('error', reject)
+    })
+}
+
 export {
     redisCluster,
+    waitForRedisClusterReady,
     testCluster,
 }
 
