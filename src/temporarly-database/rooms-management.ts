@@ -99,7 +99,7 @@ const resetPlayerByReconnection = async (room: string, playerId: string, socketI
 }
 
 const advanceCurrentQuestion = async (room: string, expectedCurrentQuestion: null | number): Promise<
-    "ROOM_NOT_FOUND" | number | "CURRENT_QUESTION_NOT_FOUND" | "QUIZ_FINISHED" | "STALE_JOB"
+    "ROOM_NOT_FOUND" | [number, number] | "CURRENT_QUESTION_NOT_FOUND" | "QUIZ_FINISHED" | "STALE_JOB"
 > => {
     return await redisCluster.eval(ADVANCE_CURRENT_QUESTION_SCRIPT, 1, roomKey(room), JSON.stringify(expectedCurrentQuestion)) as any
 }

@@ -14,9 +14,15 @@ local currentQuestion = roomData["$.currentQuestion"][1]
 
 if currentQuestion == nil or currentQuestion == cjson.null then
     local firstQuestion = questionsOrder[1]
+    local questionTimeoutJSON = redis.call("json.get", room, "$.immutableQuizSnapshot."..firstQuestion..".timeout")
+    local questionTimeout = cjson.decode(questionTimeoutJSON)[1]
+
+    if questionTimeout == nil then
+        questionTimeout = 30
+    end
 
     redis.call("json.set", room, "$.currentQuestion", tostring(firstQuestion))
-    return firstQuestion
+    return {firstQuestion, questionTimeout}
 end
 
 if currentQuestion == "finished" then
@@ -46,9 +52,15 @@ if currentQuestionIndex >= #questionsOrder then
 end
 
 local nextQuestion = questionsOrder[currentQuestionIndex + 1]
+local questionTimeoutJSON = redis.call("json.get", room, "$.immutableQuizSnapshot."..nextQuestion..".timeout")
+local questionTimeout = cjson.decode(questionTimeoutJSON)[1]
+
+if questionTimeout == nil then
+    questionTimeout = 30
+end
 
 redis.call("json.set", room, "$.currentQuestion", tostring(nextQuestion))
-return nextQuestion
+return {nextQuestion, questionTimeout}
 `
 
 export default ADVANCE_CURRENT_QUESTION_SCRIPT

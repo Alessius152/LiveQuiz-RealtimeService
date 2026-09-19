@@ -8,7 +8,7 @@ import { gameQueueJobKeys } from "./job-keys.js"
 const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | number) => {
 
     const setting = await advanceCurrentQuestion(roomCode, expectedCurrentQuestion)
-
+    console.log("ecco il setting", setting)
     if ((setting === 'CURRENT_QUESTION_NOT_FOUND') || (setting === 'ROOM_NOT_FOUND') || (setting === 'STALE_JOB')) {
         return
     }
@@ -18,15 +18,18 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
         return
     }
 
-    if (typeof setting === 'number') {
+    if (Array.isArray(setting)) {
 
-        getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.CURRENT_QUESTION_ADVANCED, { index: setting })
+        const [questionId, questionTimeout] = setting
 
-        const delay = 10000
+        getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.CURRENT_QUESTION_ADVANCED, {
+            id: questionId, 
+            timeout: questionTimeout
+        })
 
         await gameFlowQueue.add(gameQueueJobKeys.ADVANCE_GAME, {
             roomCode: roomCode,
-            expectedCurrentQuestion: setting /* questo parametro ha un motivo preciso:
+            expectedCurrentQuestion: questionId /* questo parametro ha un motivo preciso:
             il fatto che un job possa arrivare tardi.
             E' vero che tra una domanda e l'altra ci sono minimo 30 secondi di attesa,
             ma il concetto da evitare è che Redis esegua alla cieca l'advance della
@@ -42,7 +45,7 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
             ma non deve mai poter modificare uno stato che nel frattempo è cambiato.
             */
         } as BullmqJobDataType['advanceGame'], {
-            delay
+            delay: questionTimeout * 1000
         })
 
     }
