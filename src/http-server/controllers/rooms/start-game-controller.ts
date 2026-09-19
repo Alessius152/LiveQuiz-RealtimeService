@@ -4,9 +4,7 @@ import { HttpStatusCode } from "../../../utils/enums/http-status-code.js"
 import { isHostTokenValidationError, verifyHostToken } from "../../../utils/tokens/validation.js"
 import { setRoomStatusAsRunning } from "../../../temporarly-database/rooms-management.js"
 import { socketIoEvents, socketIoRooms } from "../../../socket-server/socket.io-keys-generators.js"
-import { gameFlowQueue } from "../../../game/game-queue.js"
-import { gameQueueJobKeys } from "../../../game/job-keys.js"
-import { BullmqJobDataType } from "../../../types/bullmq-job-data-types.js"
+import { advanceGame } from "../../../game/functions.js"
 
 const startGameController: RouteHandlerMethod = async (request, reply) => {
 
@@ -27,12 +25,7 @@ const startGameController: RouteHandlerMethod = async (request, reply) => {
         }
 
         io.to(socketIoRooms.quizRoom(tokenCheck.room)).emit(socketIoEvents.GAME_STARTED, {})
-
-        await gameFlowQueue.add(gameQueueJobKeys.ADVANCE_GAME, {
-            key: tokenCheck.room
-        } as BullmqJobDataType['advanceGame'], {
-            delay: 10000
-        })
+        await advanceGame(tokenCheck.room, null)
 
         reply.status(HttpStatusCode.OK).send({})
     }

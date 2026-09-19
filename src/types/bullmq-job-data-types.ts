@@ -1,7 +1,8 @@
 
 type BullmqJobDataType = {
     advanceGame: {
-        key: string
+        roomCode: string,
+        expectedCurrentQuestion: null | number
     }
 }
 
