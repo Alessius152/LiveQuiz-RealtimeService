@@ -8,7 +8,8 @@ const socketIoEvents = {
     RECOVERY_TOKEN: 'recovery-token',
     GAME_STARTED: 'game-started',
     QUIZ_FINISHED: 'quiz-finished',
-    CURRENT_QUESTION_ADVANCED: 'current-question-advanced'
+    CURRENT_QUESTION_ADVANCED: 'current-question-advanced',
+    ANSWER_SENT: 'answer-sent'
 }
 
 export {

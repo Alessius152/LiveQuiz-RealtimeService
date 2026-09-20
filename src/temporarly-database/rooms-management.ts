@@ -33,7 +33,8 @@ const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | Realt
             status: 'waiting',
             players: [],
             questionsOrder,
-            currentQuestion: null
+            currentQuestion: null,
+            answersHistory: {},
         }
         const result = await redisCluster.call("json.set", key, "$", JSON.stringify(roomStatus), "NX")
 

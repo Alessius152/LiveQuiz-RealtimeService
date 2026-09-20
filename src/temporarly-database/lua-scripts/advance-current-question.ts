@@ -21,7 +21,10 @@ if currentQuestion == nil or currentQuestion == cjson.null then
         questionTimeout = 30
     end
 
-    redis.call("json.set", room, "$.currentQuestion", tostring(firstQuestion))
+    redis.call("json.set", room, "$.currentQuestion", cjson.encode({ 
+        id = firstQuestion, 
+        openedAt = redis.call("time")[1] * 1000 
+    }))
     return {firstQuestion, questionTimeout}
 end
 
@@ -29,14 +32,16 @@ if currentQuestion == "finished" then
     return "QUIZ_FINISHED"
 end
 
-if tonumber(cjson.decode(expectedCurrQuestJson)) ~= currentQuestion then
+local currentQuestionId = currentQuestion["id"]
+
+if tonumber(cjson.decode(expectedCurrQuestJson)) ~= currentQuestionId then
     return "STALE_JOB"
 end
 
 local currentQuestionIndex;
 
 for qIndex, programmedQuestion in ipairs(questionsOrder) do
-    if programmedQuestion == currentQuestion then
+    if programmedQuestion == currentQuestionId then
         currentQuestionIndex = qIndex
         break
     end
@@ -59,7 +64,10 @@ if questionTimeout == nil then
     questionTimeout = 30
 end
 
-redis.call("json.set", room, "$.currentQuestion", tostring(nextQuestion))
+redis.call("json.set", room, "$.currentQuestion", cjson.encode({
+    id = nextQuestion,
+    openedAt = redis.call("time")[1] * 1000
+}))
 return {nextQuestion, questionTimeout}
 `
 

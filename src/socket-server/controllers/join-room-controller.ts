@@ -3,9 +3,9 @@ import { Socket } from "socket.io"
 import { joinRoomSchema } from "../schemas.js"
 import { addPlayer, resetPlayerByReconnection } from "../../temporarly-database/rooms-management.js"
 import { socketIoEvents, socketIoRooms } from "../socket.io-keys-generators.js"
-import { createPlayerToken } from "../../utils/tokens/generation.js"
+import { createPlayerAnsweringToken, createPlayerReconnectionToken } from "../../utils/tokens/generation.js"
 import { uuidv7 } from "uuidv7"
-import { isPlayerTokenValidationError, verifyPlayerToken } from "../../utils/tokens/validation.js"
+import { isPlayerReconnectionTokenValidationError, verifyPlayerReconnectionToken } from "../../utils/tokens/validation.js"
 
 const joinRoomController = async (socket: Socket, data: unknown) => {
     const validation = joinRoomSchema.safeParse(data)
@@ -35,16 +35,36 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         socket.data.room = room
         socket.data.username = added
 
-        const gameExpiration = Math.floor(Date.now() / 1000) + 60 * 5
-        const token = createPlayerToken(room, added, playerId, gameExpiration)
+        const gameExpiration = Math.floor(Date.now() / 1000) + 60 * 3 * 170 /*questa viene calcolata nel massimo
+        ogni domanda ha un timeout che, di default, è 30 secondi, ma può essere allungato a 3 minuti massimo, per quelle
+        domande che, a livello umano, vengono valutate più complicate.
+        Anche se la stanza termina, e il token rimane valido, perché le domande erano tutte di 30 secondi,
+        comunque non potrà essere usato, perché la stanza verrà distrutta, ma indipendentemente da questo,
+        il server verificherà che la stanza sulla quale vogliamo operare sia uguale a quella riportata nel token.
+
+        Conclusione: serve un token nuovo per ogni stanza.
+
+        Da notare, io calcolo il massimo pensando che ogni domanda sia di 3 minuti e moltiplico per 170.
+        Ma un quiz può avere al massimo 150 domande, non 170, 170 è troppo, anche aldilà del calcolo massimo.
+
+        Questo ci da la certezza matematica che l'utente, anche rispondendo all'ultimo millisecondo, non riscontri problemi 
+        del tipo: "401: token scaduto" o altro quando sta semplicemente giocando legittimamente
+        */
+        const reconnectionToken = createPlayerReconnectionToken(room, added, playerId, gameExpiration)
+        const answeringToken = createPlayerAnsweringToken(room, playerId, gameExpiration)
 
         socket.join(socketIoRooms.quizRoom(room))
-        socket.emit(socketIoEvents.RECOVERY_TOKEN, { token })
+        socket.emit(socketIoEvents.RECOVERY_TOKEN, {
+            sessionTokens: {
+                reconnection: reconnectionToken,
+                answering: answeringToken
+            }
+        })
     }
     else {
-        const tokenCheck = verifyPlayerToken(recoveryToken)
+        const tokenCheck = verifyPlayerReconnectionToken(recoveryToken)
 
-        if (isPlayerTokenValidationError(tokenCheck)) {
+        if (isPlayerReconnectionTokenValidationError(tokenCheck)) {
             return
         }
 

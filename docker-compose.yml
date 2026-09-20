@@ -16,7 +16,8 @@ services:
             - SERVER_PORT=3000
             #- DEBUG=ioredis:*
             - HOST_TOKEN_SECRET=1e8d02c3599ea2c991e17d1be06c1fb20ce43a0b4dea4a370ee3ce19a36ea9951e04670656c68229a8572d42def6ea13a9680d52fa19946047f18963e603f52c
-            - PLAYER_TOKEN_SECRET=1a3d7ebd041ad3fe969a3629e8b08885c76abc746e6ed159479336ec8101a169eabad2cf9fd941f3dea0ce39b972d1ebbbb7559f59c6bcf621e75666ea7ed6d1
+            - PLAYER_RECONNECTION_TOKEN_SECRET=1a3d7ebd041ad3fe969a3629e8b08885c76abc746e6ed159479336ec8101a169eabad2cf9fd941f3dea0ce39b972d1ebbbb7559f59c6bcf621e75666ea7ed6d1
+            - PLAYER_ANSWERING_TOKEN_SECRET=5dbbdafaffab807df5f62655b32a21c76bd4d941fa496eed9cc08701ec35d437d4ab8bc62ee551edb0caa3d325de690144252ea5911f2c23625447ba84a1cb7b
         networks:
             - livequiz-realtimeservice-net
             - livequiz-messagebrokers-net

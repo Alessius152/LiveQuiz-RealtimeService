@@ -12,9 +12,15 @@ type RoomHostTokenPayload = {
     exp: number
 }
 
-type RoomPlayerTokenPayload = {
+type RoomPlayerReconnectionTokenPayload = {
     room: string,
     username: string,
+    playerId: string,
+    exp: number
+}
+
+type RoomPlayerAnsweringTokenPayload = {
+    room: string,
     playerId: string,
     exp: number
 }
@@ -25,5 +31,6 @@ export {
 
 export type {
     RoomHostTokenPayload,
-    RoomPlayerTokenPayload,
+    RoomPlayerReconnectionTokenPayload,
+    RoomPlayerAnsweringTokenPayload,
 }

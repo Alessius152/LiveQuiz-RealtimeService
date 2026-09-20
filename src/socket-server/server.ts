@@ -6,6 +6,7 @@ import { createShardedAdapter } from '@socket.io/redis-adapter'
 import { joinRoomController } from './controllers/join-room-controller.js'
 import { disconnectPlayer } from '../temporarly-database/rooms-management.js'
 import { socketIoEvents } from './socket.io-keys-generators.js'
+import { handleAnswerSentController } from './controllers/answer-sent-controller.js'
 
 const startSocketServer = (fastify: FastifyInstance) => {
 
@@ -26,6 +27,8 @@ const startSocketServer = (fastify: FastifyInstance) => {
         fastify.log.info(`[socket.io] connection - ${socket.id}`)
 
         socket.on(socketIoEvents.JOIN_ROOM, (data) => joinRoomController(socket, data))
+
+        socket.on(socketIoEvents.ANSWER_SENT, (data) => handleAnswerSentController(socket, data))
 
         socket.on('disconnect', async () => {
             fastify.log.info(`[socket.io] disconnection - ${socket.id}`)
