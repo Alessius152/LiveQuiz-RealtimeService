@@ -21,9 +21,11 @@ if currentQuestion == nil or currentQuestion == cjson.null then
         questionTimeout = 30
     end
 
+    local redisTime = redis.call("time")
+    local openedAt = redisTime[1] * 1000 + math.floor(redisTime[2] / 1000)
     redis.call("json.set", room, "$.currentQuestion", cjson.encode({ 
         id = firstQuestion, 
-        openedAt = redis.call("time")[1] * 1000 
+        openedAt = openedAt
     }))
     return {firstQuestion, questionTimeout}
 end
@@ -64,9 +66,11 @@ if questionTimeout == nil then
     questionTimeout = 30
 end
 
+local redisTime = redis.call("time")
+local openedAt = redisTime[1] * 1000 + math.floor(redisTime[2] / 1000)
 redis.call("json.set", room, "$.currentQuestion", cjson.encode({
     id = nextQuestion,
-    openedAt = redis.call("time")[1] * 1000
+    openedAt = openedAt
 }))
 return {nextQuestion, questionTimeout}
 `

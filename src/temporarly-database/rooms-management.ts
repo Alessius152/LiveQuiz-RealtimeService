@@ -5,6 +5,7 @@ import ADD_PLAYER_SCRIPT from "./lua-scripts/add-player.js"
 import ADVANCE_CURRENT_QUESTION_SCRIPT from "./lua-scripts/advance-current-question.js"
 import DISCONNECT_PLAYER_SCRIPT from "./lua-scripts/disconnect-player.js"
 import HANDLE_PLAYER_RECONNECTION_SCRIPT from "./lua-scripts/handle-player-reconnection.js"
+import REGISTER_PLAYER_ANSWER_SCRIPT from "./lua-scripts/register-player-answer.js"
 import SET_ROOM_STATUS_AS_RUNNING_SCRIPT from "./lua-scripts/set-room-status-as-running.js"
 import { quizKey, roomKey } from "./redis-keys-generators.js"
 
@@ -105,6 +106,13 @@ const advanceCurrentQuestion = async (room: string, expectedCurrentQuestion: nul
     return await redisCluster.eval(ADVANCE_CURRENT_QUESTION_SCRIPT, 1, roomKey(room), JSON.stringify(expectedCurrentQuestion)) as any
 }
 
+const registerPlayerAnswer = async (room: string, socketId: string, playerId: string, questionId: number, answer: number | Array<number> | string): Promise<
+    "ROOM_NOT_FOUND" | "UNPROCESSABLE_QUESTION" | "PLAYER_IS_NOT_PLAYING" | 
+    "UNABLE_TO_WRITE_STATUS_OF_ANOTHER_USER" | "OK" | "INVALID_ANSWER" | "ALREADY_ANSWERED"
+> => {
+    return await redisCluster.eval(REGISTER_PLAYER_ANSWER_SCRIPT, 1, roomKey(room), socketId, playerId, questionId, JSON.stringify(answer)) as any
+}
+
 export {
     loadNewRoom,
     deleteRoom,
@@ -114,4 +122,5 @@ export {
     setRoomStatusAsRunning,
     resetPlayerByReconnection,
     advanceCurrentQuestion,
+    registerPlayerAnswer,
 }
