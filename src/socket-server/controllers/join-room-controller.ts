@@ -23,7 +23,7 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
 
         const playerId = uuidv7()
 
-        const added = await addPlayer(room, { username, socket: socket.id, playerId })
+        const added = await addPlayer(room, { username, socketId: socket.id, playerId, score: 0 })
 
         if ((added === "ROOM_NOT_FOUND") || (added === "MAX_CANDIDATES") || (added === "ALREADY_JOINED") || (added === "GAME_ALREADY_STARTED")) {
             /*

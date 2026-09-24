@@ -39,7 +39,12 @@ for suffix = 0, 3 do
     end
 
     if not found then
-        redis.call("json.arrappend", room, ".players", cjson.encode({username = candidate, socketId = socketId, playerId = playerId}))
+        redis.call("json.arrappend", room, ".players", cjson.encode({
+        username = candidate, 
+        socketId = socketId, 
+        playerId = playerId,
+        score = 0
+    }))
         return candidate
     end
 end

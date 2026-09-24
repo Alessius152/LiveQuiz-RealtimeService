@@ -1,6 +1,6 @@
 import { redisCluster } from "../config/redis.js"
 import { ParsedCreatedQuizEventPayload } from "../types/quizzes-storage.js"
-import { PlayerJoinInput, RealtimeRoomStatus } from "../types/realtime-room.js"
+import { PlayerStatus, RealtimeRoomStatus } from "../types/realtime-room.js"
 import ADD_PLAYER_SCRIPT from "./lua-scripts/add-player.js"
 import ADVANCE_CURRENT_QUESTION_SCRIPT from "./lua-scripts/advance-current-question.js"
 import DISCONNECT_PLAYER_SCRIPT from "./lua-scripts/disconnect-player.js"
@@ -78,10 +78,10 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 
 }
 
-const addPlayer = async (room: string, player: PlayerJoinInput): Promise<
+const addPlayer = async (room: string, player: PlayerStatus): Promise<
     "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED"
 > => {
-    return await redisCluster.eval(ADD_PLAYER_SCRIPT, 1, roomKey(room), player.username, player.socket, player.playerId) as any
+    return await redisCluster.eval(ADD_PLAYER_SCRIPT, 1, roomKey(room), player.username, player.socketId!, player.playerId) as any
 }
 
 const disconnectPlayer = async (room: string, username: string, socket: string): Promise<0 | 1> => {
@@ -101,7 +101,7 @@ const resetPlayerByReconnection = async (room: string, playerId: string, socketI
 }
 
 const advanceCurrentQuestion = async (room: string, expectedCurrentQuestion: null | number): Promise<
-    "ROOM_NOT_FOUND" | [number, number] | "CURRENT_QUESTION_NOT_FOUND" | "QUIZ_FINISHED" | "STALE_JOB"
+    "ROOM_NOT_FOUND" | [number, number, number] | "CURRENT_QUESTION_NOT_FOUND" | "QUIZ_FINISHED" | "STALE_JOB"
 > => {
     return await redisCluster.eval(ADVANCE_CURRENT_QUESTION_SCRIPT, 1, roomKey(room), JSON.stringify(expectedCurrentQuestion)) as any
 }

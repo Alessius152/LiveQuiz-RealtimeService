@@ -7,8 +7,9 @@ local questionId = tonumber(ARGV[3])
 local answer = cjson.decode(ARGV[4])
 
 local questionRedisPath = "$.immutableQuizSnapshot." .. questionId
-local playerRedisPath = '$.players[?(@.socketId == "'..socketId..'")].playerId'
-local roomDataJson = redis.call("json.get", room, "$.currentQuestion", questionRedisPath, playerRedisPath)
+local playerIdRedisPath = '$.players[?(@.socketId == "'..socketId..'")].playerId'
+local playerScoreRedisPath = '$.players[?(@.socketId == "'..socketId..'")].score'
+local roomDataJson = redis.call("json.get", room, "$.currentQuestion", questionRedisPath, playerIdRedisPath, playerScoreRedisPath)
 
 if not roomDataJson then
     return "ROOM_NOT_FOUND"
@@ -17,7 +18,7 @@ end
 local roomDataParsed = cjson.decode(roomDataJson)
 local currentQuestion = roomDataParsed["$.currentQuestion"][1]
 local questionFromSnapshot = roomDataParsed[questionRedisPath][1]
-local playerData = roomDataParsed[playerRedisPath][1]
+local playerData = roomDataParsed[playerIdRedisPath][1]
 
 if currentQuestion == nil or currentQuestion == cjson.null or currentQuestion == "finished" then return "UNPROCESSABLE_QUESTION" end
 if currentQuestion.id ~= questionId then return "UNPROCESSABLE_QUESTION" end
@@ -79,6 +80,51 @@ local result = redis.call("json.set", room, playerAnswerRedisPath, cjson.encode(
 
 if not result then
     return "ALREADY_ANSWERED"
+end
+
+local function calculateScoreDelta(question, inputAnswer, sentAt)
+    local delta = 0
+    local type = question.type
+
+    if type == 1 then
+        return delta
+    end
+
+    local correctAnswer = question.answers
+    
+    if type == 0 then
+        if inputAnswer == correctAnswer[1] then
+            delta = delta + 100
+        else 
+            delta = delta - 45
+        end
+    elseif type == 2 then
+        for _, optionSelected in ipairs(inputAnswer) do
+            local isCorrect = false
+
+            for _, singleCorrectAnswer in ipairs(correctAnswer) do
+                if optionSelected == singleCorrectAnswer then
+                    isCorrect = true
+                    break
+                end
+            end
+
+            if not isCorrect then
+                delta = 0
+                break
+            end
+
+            delta = delta + 100
+        end
+    end
+
+    return delta
+end
+
+local scoreDelta = calculateScoreDelta(questionFromSnapshot, answer, sentAt)
+
+if scoreDelta ~= 0 then
+    redis.call("json.numincrby", room, playerScoreRedisPath, scoreDelta)
 end
 
 return "OK"

@@ -8,7 +8,7 @@ import { gameQueueJobKeys } from "./job-keys.js"
 const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | number) => {
 
     const setting = await advanceCurrentQuestion(roomCode, expectedCurrentQuestion)
-    console.log("ecco il setting", setting)
+    
     if ((setting === 'CURRENT_QUESTION_NOT_FOUND') || (setting === 'ROOM_NOT_FOUND') || (setting === 'STALE_JOB')) {
         return
     }
@@ -20,11 +20,12 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
 
     if (Array.isArray(setting)) {
 
-        const [questionId, questionTimeout] = setting
+        const [questionId, questionTimeout, openedAt] = setting
 
         getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.CURRENT_QUESTION_ADVANCED, {
             id: questionId, 
-            timeout: questionTimeout
+            timeout: questionTimeout,
+            openedAt
         })
 
         await gameFlowQueue.add(gameQueueJobKeys.ADVANCE_GAME, {

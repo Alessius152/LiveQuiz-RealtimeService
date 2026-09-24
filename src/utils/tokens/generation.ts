@@ -20,7 +20,9 @@ const createHostToken = (room: string) => generateAnyoneAppToken({
         inizializzata, la key room:123456 avrà, in
         redis, un ttl di 5 minuti, dopo l'evento 
         start-game, si ricalcolerà il ttl tenendo 
-        conto del tempo di risposta di ogni domanda.*/
+        conto del tempo di risposta di ogni domanda.
+        
+        TODO: Implementazione del TTL*/
 }, hostTokenSecret)
 
 const createPlayerReconnectionToken = (room: string, username: string, playerId: string, gameExp: number) => generateAnyoneAppToken({

@@ -1,12 +1,10 @@
 import { ParsedCreatedQuizEventPayload } from "./quizzes-storage.js"
 
-type PlayerJoinInput = { username: string, socket: string, playerId: string } /*questo type si usa quando un utente deve entrare in una stanza
-e quindi servono solo i dati necessari affinché venga inizializzato*/
-
 type PlayerStatus = {
     username: string,
     socketId: string | null,
     playerId: string,
+    score: number
 }
 
 type ImmutableQuizSnapshot = ParsedCreatedQuizEventPayload
@@ -29,30 +27,12 @@ type RealtimeRoomStatus = {
     l'idea è che io voglio una struttura del genere:
     {
         [id_domanda_1]: {
-            [player_id_4]: { answer: 1, answeredAt: 1789833012451 },
-            [player_id_2]: { answer: 1, answeredAt: 1789833013782 },
-            [player_id_3]: { answer: 0, answeredAt: 1789833015120 },
             [player_id_1]: { answer: 1, answeredAt: 1789833016893 },
         },
         [id_domanda_2]: {
-            [player_id_2]: { answer: [1], answeredAt: 1789833041024 },
             [player_id_1]: { answer: [1], answeredAt: 1789833042371 },
-            [player_id_4]: { answer: [3], answeredAt: 1789833044018 },
-            [player_id_3]: { answer: [1, 2], answeredAt: 1789833045832 },
         },
         [id_domanda_3]: {
-            [player_id_3]: {
-                answer: "La risposta a questa domanda è ...",
-                answeredAt: 1789833072145
-            },
-            [player_id_2]: {
-                answer: "Per me, tenendo conto che, ...",
-                answeredAt: 1789833073987
-            },
-            [player_id_4]: {
-                answer: "Probailmente la causa è ...",
-                answeredAt: 1789833075721
-            },
             [player_id_1]: {
                 answer: "Il contesto ci porta a pensare ...",
                 answeredAt: 1789833077510
@@ -68,6 +48,6 @@ type RealtimeRoomStatus = {
 }
 
 export type {
+    PlayerStatus,
     RealtimeRoomStatus,
-    PlayerJoinInput
 }

@@ -38,19 +38,3 @@ const handleAnswerSentController = async (socket: Socket, data: unknown) => {
 export {
     handleAnswerSentController
 }
-
-
-/*
-[
-  {
-    "0": {"type": 0, "answers": [1]},
-    "1": {"type": 1},
-    "2": {"type": 2, "options": [0, 1, 2, 3], "answers": [0, 2, 3]},
-    "3": {"type": 0, "answers": [0]},
-    "4": {"type": 2, "options": [0, 1, 2, 3], "answers": [1]},
-    "5": {"type": 1},
-    "6": {"type": 2, "options": [0, 1, 2, 3], "answers": [0, 3]},
-    "7": {"type": 0, "answers": [1]}
-  }
-]
-  */

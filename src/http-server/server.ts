@@ -1,5 +1,6 @@
 
 import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import { roomsRouter } from './routers/rooms.js'
 import { startSocketServer } from '../socket-server/server.js'
 import { testCluster, waitForRedisClusterReady } from '../config/redis.js'
@@ -16,7 +17,11 @@ const start = async () => {
 
         server.decorate('io', getIO())
         server.register(roomsRouter, { prefix: '/room' })
-        
+
+        await server.register(cors, {
+            origin: true 
+        })
+
         await server.listen({ port: Number(process.env.SERVER_PORT), host: process.env.SERVER_HOST })
     }
     catch (err) {

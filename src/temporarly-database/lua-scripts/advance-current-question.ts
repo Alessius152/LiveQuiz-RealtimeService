@@ -27,7 +27,7 @@ if currentQuestion == nil or currentQuestion == cjson.null then
         id = firstQuestion, 
         openedAt = openedAt
     }))
-    return {firstQuestion, questionTimeout}
+    return {firstQuestion, questionTimeout, openedAt}
 end
 
 if currentQuestion == "finished" then
@@ -72,7 +72,7 @@ redis.call("json.set", room, "$.currentQuestion", cjson.encode({
     id = nextQuestion,
     openedAt = openedAt
 }))
-return {nextQuestion, questionTimeout}
+return {nextQuestion, questionTimeout, openedAt}
 `
 
 export default ADVANCE_CURRENT_QUESTION_SCRIPT
