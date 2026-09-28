@@ -9,7 +9,7 @@ const gameFlowWorker = new Worker(
         const handler = queueJobHandlersMap.get(job.name as JobName)
 
         if (!handler) {
-            console.log('>>> HANDLER NON TROVATO:', job.name)
+            // console.log('>>> HANDLER NON TROVATO:', job.name)
             return
         }
 
@@ -22,23 +22,23 @@ const gameFlowWorker = new Worker(
 )
 
 gameFlowWorker.on('ready', () => {
-    console.log('>>> GAME FLOW WORKER READY')
+    // console.log('>>> GAME FLOW WORKER READY')
 })
 
 gameFlowWorker.on('active', (job) => {
-    console.log('>>> JOB ACTIVE:', job.id)
+    // console.log('>>> JOB ACTIVE:', job.id)
 })
 
 gameFlowWorker.on('completed', (job) => {
-    console.log(`>>> Job ${job.id} completato`)
+    // console.log(`>>> Job ${job.id} completato`)
 })
 
 gameFlowWorker.on('failed', (job, error) => {
-    console.error(`>>> Job ${job?.id} fallito:`, error)
+    // console.error(`>>> Job ${job?.id} fallito:`, error)
 })
 
 gameFlowWorker.on('error', (error) => {
-    console.error('>>> GAME FLOW WORKER ERROR:', error)
+    // console.error('>>> GAME FLOW WORKER ERROR:', error)
 })
 export {
     gameFlowWorker

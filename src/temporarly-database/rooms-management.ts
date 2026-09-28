@@ -12,14 +12,13 @@ import { quizKey, roomKey } from "./redis-keys-generators.js"
 const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | RealtimeRoomStatus> = async (quizId) => {
 
     const qKey = quizKey(quizId)
-    const qSnapshot = (await redisCluster.call("json.get", qKey, "$")) as string | null
+    let qSnapshot = await redisCluster.json.get(qKey, { path: "$" }) as [ParsedCreatedQuizEventPayload] | null
 
-    if (!qSnapshot) {
+    if (!(qSnapshot && qSnapshot[0])) {
         return "QUIZ_SNAPSHOT_NOT_FOUND"
     }
 
-    const parsedSnapshot = JSON.parse(qSnapshot)[0] as ParsedCreatedQuizEventPayload
-
+    const parsedSnapshot = qSnapshot[0] as ParsedCreatedQuizEventPayload
     const maxAttempts = 10
     let attempts = 0
 
@@ -37,7 +36,7 @@ const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | Realt
             currentQuestion: null,
             answersHistory: {},
         }
-        const result = await redisCluster.call("json.set", key, "$", JSON.stringify(roomStatus), "NX")
+        const result = await redisCluster.json.set(key, "$", roomStatus, { NX: true })
 
         if (result === 'OK') {
             return roomStatus
@@ -63,11 +62,7 @@ const deleteRoom = async (code: string) => {
 const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 
     const key = roomKey(code)
-    const result = await redisCluster.call(
-        "json.get",
-        key,
-        "$"
-    ) as string | null
+    const result = await redisCluster.json.get(key, { path: "$" }) as string | null
 
     if (!result) {
         return null
@@ -81,36 +76,53 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 const addPlayer = async (room: string, player: PlayerStatus): Promise<
     "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED"
 > => {
-    return await redisCluster.eval(ADD_PLAYER_SCRIPT, 1, roomKey(room), player.username, player.socketId!, player.playerId) as any
+    return await redisCluster.eval(ADD_PLAYER_SCRIPT, {
+        keys: [roomKey(room)],
+        arguments: [player.username, player.socketId!, player.playerId]
+    }) as any
 }
 
 const disconnectPlayer = async (room: string, username: string, socket: string): Promise<0 | 1> => {
-    return await redisCluster.eval(DISCONNECT_PLAYER_SCRIPT, 1, roomKey(room), username, socket) as any
+    return await redisCluster.eval(DISCONNECT_PLAYER_SCRIPT, {
+        keys: [roomKey(room)],
+        arguments: [username, socket]
+    }) as any
 }
 
 const setRoomStatusAsRunning = async (room: string): Promise<
     "ROOM_NOT_FOUND" | "ALREADY_RUNNING" | "OK"
 > => {
-    return await redisCluster.eval(SET_ROOM_STATUS_AS_RUNNING_SCRIPT, 1, roomKey(room)) as any
+    return await redisCluster.eval(SET_ROOM_STATUS_AS_RUNNING_SCRIPT, {
+        keys: [roomKey(room)]
+    }) as any
 }
 
 const resetPlayerByReconnection = async (room: string, playerId: string, socketId: string): Promise<
     null | "PLAYER_ALREADY_CONNECTED" | "PLAYERID_NOT_FOUND"
 > => {
-    return await redisCluster.eval(HANDLE_PLAYER_RECONNECTION_SCRIPT, 1, roomKey(room), playerId, socketId) as any
+    return await redisCluster.eval(HANDLE_PLAYER_RECONNECTION_SCRIPT, {
+        keys: [roomKey(room)],
+        arguments: [playerId, socketId]
+    }) as any
 }
 
 const advanceCurrentQuestion = async (room: string, expectedCurrentQuestion: null | number): Promise<
     "ROOM_NOT_FOUND" | [number, number, number] | "CURRENT_QUESTION_NOT_FOUND" | "QUIZ_FINISHED" | "STALE_JOB"
 > => {
-    return await redisCluster.eval(ADVANCE_CURRENT_QUESTION_SCRIPT, 1, roomKey(room), JSON.stringify(expectedCurrentQuestion)) as any
+    return await redisCluster.eval(ADVANCE_CURRENT_QUESTION_SCRIPT, {
+        keys: [roomKey(room)],
+        arguments: [JSON.stringify(expectedCurrentQuestion)]
+    }) as any
 }
 
 const registerPlayerAnswer = async (room: string, socketId: string, playerId: string, questionId: number, answer: number | Array<number> | string): Promise<
-    "ROOM_NOT_FOUND" | "UNPROCESSABLE_QUESTION" | "PLAYER_IS_NOT_PLAYING" | 
+    "ROOM_NOT_FOUND" | "UNPROCESSABLE_QUESTION" | "PLAYER_IS_NOT_PLAYING" |
     "UNABLE_TO_WRITE_STATUS_OF_ANOTHER_USER" | "OK" | "INVALID_ANSWER" | "ALREADY_ANSWERED"
 > => {
-    return await redisCluster.eval(REGISTER_PLAYER_ANSWER_SCRIPT, 1, roomKey(room), socketId, playerId, questionId, JSON.stringify(answer)) as any
+    return await redisCluster.eval(REGISTER_PLAYER_ANSWER_SCRIPT, {
+        keys: [roomKey(room)],
+        arguments: [socketId, playerId, `${questionId}`, JSON.stringify(answer)]
+    }) as any
 }
 
 export {

@@ -1,51 +1,54 @@
-import Redis from 'ioredis'
+import { createCluster } from 'redis'
 
-const redisCluster = new Redis.Cluster([
-    { host: 'livequiz-RTservice-rediscluster-1', port: 6379 },
-    { host: 'livequiz-RTservice-rediscluster-2', port: 6379 },
-    { host: 'livequiz-RTservice-rediscluster-3', port: 6379 },
-    { host: 'livequiz-RTservice-rediscluster-4', port: 6379 },
-    { host: 'livequiz-RTservice-rediscluster-5', port: 6379 },
-    { host: 'livequiz-RTservice-rediscluster-6', port: 6379 },
-], {
-    clusterRetryStrategy: (times) => Math.min(times * 100, 3000),
-    scaleReads: 'slave',
-    shardedSubscribers: true
-})
-
-redisCluster.on('connect', () => {
-    console.log('redis cluster connected!')
+const redisCluster = createCluster({
+    rootNodes: [
+        { url: 'redis://livequiz-RTservice-rediscluster-1:6379' },
+        { url: 'redis://livequiz-RTservice-rediscluster-2:6379' },
+        { url: 'redis://livequiz-RTservice-rediscluster-3:6379' },
+        { url: 'redis://livequiz-RTservice-rediscluster-4:6379' },
+        { url: 'redis://livequiz-RTservice-rediscluster-5:6379' },
+        { url: 'redis://livequiz-RTservice-rediscluster-6:6379' }
+    ],
+    defaults: {
+        socket: {
+            connectTimeout: 10000,
+            reconnectStrategy: (retries) => {
+                if (retries > 10) {
+                    return new Error('Impossibile connettersi al Redis Cluster');
+                }
+                return Math.min(retries * 500, 3000); // Riprova in modo incrementale
+            }
+        }
+    }
 })
 
 redisCluster.on('error', (err) => {
-    console.error('redis cluster error:', err)
+    console.error('REDIS CLUSTER ERROR:', err)
+})
+
+redisCluster.on('connect', () => {
+    console.log('REDIS CLUSTER CONNECT')
+})
+
+redisCluster.on('ready', () => {
+    console.log('REDIS CLUSTER READY')
+})
+
+redisCluster.on('reconnecting', () => {
+    console.log('REDIS CLUSTER RECONNECTING')
 })
 
 async function testCluster() {
     try {
         await redisCluster.set('test_key', 'it works!')
         const val = await redisCluster.get('test_key')
-        console.log("redis cluster: test passed", val)
+        console.log('redis cluster: test passed', val)
     } catch (error) {
-        console.error("error during the redis cluster test", error)
+        console.error('error during the redisCluster test', error)
     }
-}
-
-async function waitForRedisClusterReady() {
-    if (redisCluster.status === 'ready') {
-        return
-    }
-
-    await new Promise<void>((resolve, reject) => {
-        redisCluster.once('ready', resolve)
-        redisCluster.once('error', reject)
-    })
 }
 
 export {
     redisCluster,
-    waitForRedisClusterReady,
-    testCluster,
+    testCluster
 }
-
-// redis-cli --cluster call localhost:6379 keys '*' per avere tutte le chiavi del cluster

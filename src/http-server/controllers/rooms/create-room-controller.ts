@@ -6,8 +6,9 @@ import { loadNewRoom } from "../../../temporarly-database/rooms-management.js"
 import { createHostToken } from "../../../utils/tokens/generation.js"
 
 const createRoomController: RouteHandlerMethod = async (request, reply) => {
-
     const { quizId } = request.body as { quizId: string }
+
+    console.log(quizId)
 
     try {
 
@@ -17,7 +18,6 @@ const createRoomController: RouteHandlerMethod = async (request, reply) => {
         }
 
         const response = await loadNewRoom(quizId)
-
         if (response === "QUIZ_SNAPSHOT_NOT_FOUND") {
             return reply.status(HttpStatusCode.NOT_FOUND).send({ error: "unexistant_quiz" })
         }

@@ -52,9 +52,13 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         */
         const reconnectionToken = createPlayerReconnectionToken(room, added, playerId, gameExpiration)
         const answeringToken = createPlayerAnsweringToken(room, playerId, gameExpiration)
+        const broadcastRoom = socketIoRooms.quizRoom(room)
 
-        socket.join(socketIoRooms.quizRoom(room))
-        socket.emit(socketIoEvents.RECOVERY_TOKEN, {
+        socket.join(broadcastRoom)
+        socket.to(broadcastRoom).emit(socketIoEvents.NEW_PLAYER_JOINED, {
+            username: socket.data.username
+        })
+        socket.emit(socketIoEvents.ENTERED_SUCCESSFULLY, {
             sessionTokens: {
                 reconnection: reconnectionToken,
                 answering: answeringToken
@@ -81,7 +85,12 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         socket.data.room = room
         socket.data.username = resetted
 
-        socket.join(socketIoRooms.quizRoom(room))
+        const broadcastRoom = socketIoRooms.quizRoom(room)
+
+        socket.join(broadcastRoom)
+        socket.to(broadcastRoom).emit(socketIoEvents.NEW_PLAYER_JOINED, {
+            username: socket.data.username
+        })
     }
 
 }

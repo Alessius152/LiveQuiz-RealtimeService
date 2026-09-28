@@ -6,9 +6,12 @@ import { setRoomStatusAsRunning } from "../../../temporarly-database/rooms-manag
 import { socketIoEvents, socketIoRooms } from "../../../socket-server/socket.io-keys-generators.js"
 import { advanceGame } from "../../../game/functions.js"
 
+
 const startGameController: RouteHandlerMethod = async (request, reply) => {
 
     const { hostToken } = request.body as { hostToken: string }
+
+    console.log("[GAME FLOW] starting request 1")
 
     try {
         const tokenCheck = verifyHostToken(hostToken)
@@ -25,6 +28,7 @@ const startGameController: RouteHandlerMethod = async (request, reply) => {
         }
 
         io.to(socketIoRooms.quizRoom(tokenCheck.room)).emit(socketIoEvents.GAME_STARTED, {})
+        console.log("[GAME FLOW] game-started sended 2")
         await advanceGame(tokenCheck.room, null)
 
         reply.status(HttpStatusCode.OK).send({})

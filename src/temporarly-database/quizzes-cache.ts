@@ -8,7 +8,7 @@ const saveQuiz = async (quizStruct: CachedExistantQuiz) => {
         creatorId: quizStruct.quiz[0],
         questions: quizStruct.questions
     }
-    await redisCluster.call("json.set", quizKey(quizStruct.quiz[1]), "$", JSON.stringify(data))
+    await redisCluster.json.set(quizKey(quizStruct.quiz[1]), "$", data)
 }
 
 const checkQuizExists = async (quizId: string): Promise<boolean> => {

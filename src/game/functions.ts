@@ -7,6 +7,8 @@ import { gameQueueJobKeys } from "./job-keys.js"
 
 const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | number) => {
 
+    console.log("[GAME FLOW] advanceGame() call")
+
     const setting = await advanceCurrentQuestion(roomCode, expectedCurrentQuestion)
     
     if ((setting === 'CURRENT_QUESTION_NOT_FOUND') || (setting === 'ROOM_NOT_FOUND') || (setting === 'STALE_JOB')) {
@@ -27,8 +29,9 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
             timeout: questionTimeout,
             openedAt
         })
+        console.log("[GAME FLOW] current question data sended")
 
-        await gameFlowQueue.add(gameQueueJobKeys.ADVANCE_GAME, {
+        const job = await gameFlowQueue.add(gameQueueJobKeys.ADVANCE_GAME, {
             roomCode: roomCode,
             expectedCurrentQuestion: questionId /* questo parametro ha un motivo preciso:
             il fatto che un job possa arrivare tardi.
@@ -48,6 +51,7 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
         } as BullmqJobDataType['advanceGame'], {
             delay: questionTimeout * 1000
         })
+        console.log("the job i just added will be executed at -> ", job.timestamp + (job.opts.delay ?? 0))
 
     }
 
