@@ -11,12 +11,12 @@ const redisCluster = createCluster({
     ],
     defaults: {
         socket: {
-            connectTimeout: 10000,
+            connectTimeout: 60000,
             reconnectStrategy: (retries) => {
                 if (retries > 10) {
-                    return new Error('Impossibile connettersi al Redis Cluster');
+                    return new Error('Impossibile connettersi al Redis Cluster')
                 }
-                return Math.min(retries * 500, 3000); // Riprova in modo incrementale
+                return Math.min(retries * 500, 3000)
             }
         }
     }

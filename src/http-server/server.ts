@@ -35,15 +35,7 @@ const start = async () => {
 
 (async () => {
     console.log("bootstrap 1")
-    await Promise.race([
-        redisCluster.connect(),
-        new Promise((_, reject) =>
-            setTimeout(
-                () => reject(new Error('Redis Cluster connect timeout')),
-                10000
-            )
-        )
-    ])
+    await redisCluster.connect()
     console.log("bootstrap 2")
     await testCluster()
     console.log("bootstrap 3")

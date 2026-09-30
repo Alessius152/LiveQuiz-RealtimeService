@@ -5,11 +5,13 @@ local username = ARGV[1]
 local socketId = ARGV[2]
 local playerId = ARGV[3]
 
+local playersFormatKey = "$.players"
+
 local roomDataJson = redis.call(
     "JSON.GET",
     room,
     "$.status",
-    "$.players"
+    playersFormatKey
 )
 
 if not roomDataJson then
@@ -24,7 +26,7 @@ if status == "running" then
     return "GAME_ALREADY_STARTED"
 end
 
-local players = roomData["$.players"][1]
+local players = roomData[playersFormatKey][1]
 
 local candidate = username
 
@@ -63,7 +65,17 @@ for suffix = 0, 3 do
             })
         )
 
-        return candidate
+        local usernames = {}
+
+        for _, player in ipairs(players) do
+            table.insert(usernames, player.username)
+        end
+
+        if #usernames == 0 then
+            return {candidate, "[]"}
+        else 
+            return {candidate, cjson.encode(usernames)}
+        end
     end
 end
 

@@ -36,7 +36,7 @@ const startSocketServer = async (fastify: FastifyInstance) => {
 
         socket.on(socketIoEvents.JOIN_ROOM, (data) => joinRoomController(socket, data))
 
-        socket.on(socketIoEvents.ANSWER_SENT, (data) => handleAnswerSentController(socket, data))
+        socket.on(socketIoEvents.ANSWER_SENT, (data, ack) => handleAnswerSentController(socket, data, ack))
 
         socket.on('disconnecting', async ()=>{
             const {rooms} = socket

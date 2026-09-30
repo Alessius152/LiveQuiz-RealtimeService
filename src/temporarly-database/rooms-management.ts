@@ -74,7 +74,7 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 }
 
 const addPlayer = async (room: string, player: PlayerStatus): Promise<
-    "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED"
+    "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED" | [string, string] /*nome con il quale entro; lista degli utenti già dentro*/
 > => {
     return await redisCluster.eval(ADD_PLAYER_SCRIPT, {
         keys: [roomKey(room)],
@@ -117,7 +117,7 @@ const advanceCurrentQuestion = async (room: string, expectedCurrentQuestion: nul
 
 const registerPlayerAnswer = async (room: string, socketId: string, playerId: string, questionId: number, answer: number | Array<number> | string): Promise<
     "ROOM_NOT_FOUND" | "UNPROCESSABLE_QUESTION" | "PLAYER_IS_NOT_PLAYING" |
-    "UNABLE_TO_WRITE_STATUS_OF_ANOTHER_USER" | "OK" | "INVALID_ANSWER" | "ALREADY_ANSWERED"
+    "UNABLE_TO_WRITE_STATUS_OF_ANOTHER_USER" | number | "INVALID_ANSWER" | "ALREADY_ANSWERED"
 > => {
     return await redisCluster.eval(REGISTER_PLAYER_ANSWER_SCRIPT, {
         keys: [roomKey(room)],

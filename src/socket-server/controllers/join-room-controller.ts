@@ -32,8 +32,22 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
             return
         }
 
+        const [candidate, players] = added
+
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log("DEBUG")
+        console.log(added)
+
         socket.data.room = room
-        socket.data.username = added
+        socket.data.username = candidate
 
         const gameExpiration = Math.floor(Date.now() / 1000) + 60 * 3 * 170 /*questa viene calcolata nel massimo
         ogni domanda ha un timeout che, di default, è 30 secondi, ma può essere allungato a 3 minuti massimo, per quelle
@@ -50,7 +64,7 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         Questo ci da la certezza matematica che l'utente, anche rispondendo all'ultimo millisecondo, non riscontri problemi 
         del tipo: "401: token scaduto" o altro quando sta semplicemente giocando legittimamente
         */
-        const reconnectionToken = createPlayerReconnectionToken(room, added, playerId, gameExpiration)
+        const reconnectionToken = createPlayerReconnectionToken(room, candidate, playerId, gameExpiration)
         const answeringToken = createPlayerAnsweringToken(room, playerId, gameExpiration)
         const broadcastRoom = socketIoRooms.quizRoom(room)
 
@@ -62,7 +76,8 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
             sessionTokens: {
                 reconnection: reconnectionToken,
                 answering: answeringToken
-            }
+            },
+            membersList: JSON.parse(players)
         })
     }
     else {

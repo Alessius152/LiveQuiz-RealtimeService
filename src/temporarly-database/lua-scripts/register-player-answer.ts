@@ -127,7 +127,7 @@ if scoreDelta ~= 0 then
     redis.call("json.numincrby", room, playerScoreRedisPath, scoreDelta)
 end
 
-return "OK"
+return sentAt
 `
 
 export default REGISTER_PLAYER_ANSWER_SCRIPT
