@@ -4,6 +4,7 @@ import { PlayerStatus, RealtimeRoomStatus } from "../types/realtime-room.js"
 import ADD_PLAYER_SCRIPT from "./lua-scripts/add-player.js"
 import ADVANCE_CURRENT_QUESTION_SCRIPT from "./lua-scripts/advance-current-question.js"
 import DISCONNECT_PLAYER_SCRIPT from "./lua-scripts/disconnect-player.js"
+import FINALIZE_GAME_SCRIPT from "./lua-scripts/finalize-game.js"
 import HANDLE_PLAYER_RECONNECTION_SCRIPT from "./lua-scripts/handle-player-reconnection.js"
 import REGISTER_PLAYER_ANSWER_SCRIPT from "./lua-scripts/register-player-answer.js"
 import SET_ROOM_STATUS_AS_RUNNING_SCRIPT from "./lua-scripts/set-room-status-as-running.js"
@@ -125,6 +126,28 @@ const registerPlayerAnswer = async (room: string, socketId: string, playerId: st
     }) as any
 }
 
+const finalizeGame = async (room: string): Promise<
+    any
+> => {
+    console.log("[][]")
+    console.log("[][]")
+    console.log("[][]")
+    console.log("[][]")
+    console.log("[][]")
+    console.log("[][]")
+    try {
+        console.log("BEFORE EVAL")
+
+        const result = await redisCluster.eval(FINALIZE_GAME_SCRIPT, {
+            keys: [roomKey(room)]
+        })
+
+        console.log("AFTER EVAL", result)
+    } catch (err) {
+        console.error("FINALIZE EVAL ERROR:", err)
+    }
+}
+
 export {
     loadNewRoom,
     deleteRoom,
@@ -135,4 +158,5 @@ export {
     resetPlayerByReconnection,
     advanceCurrentQuestion,
     registerPlayerAnswer,
+    finalizeGame,
 }

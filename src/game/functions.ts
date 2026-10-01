@@ -1,22 +1,22 @@
 import { getIO } from "../global/ioInstance.js"
 import { socketIoEvents, socketIoRooms } from "../socket-server/socket.io-keys-generators.js"
-import { advanceCurrentQuestion } from "../temporarly-database/rooms-management.js"
+import { advanceCurrentQuestion, finalizeGame } from "../temporarly-database/rooms-management.js"
 import { BullmqJobDataType } from "../types/bullmq-job-data-types.js"
 import { gameFlowQueue } from "./game-queue.js"
 import { gameQueueJobKeys } from "./job-keys.js"
 
 const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | number) => {
 
-    console.log("[GAME FLOW] advanceGame() call")
-
     const setting = await advanceCurrentQuestion(roomCode, expectedCurrentQuestion)
-    
+
     if ((setting === 'CURRENT_QUESTION_NOT_FOUND') || (setting === 'ROOM_NOT_FOUND') || (setting === 'STALE_JOB')) {
         return
     }
 
     if (setting === 'QUIZ_FINISHED') {
         getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.QUIZ_FINISHED)
+        
+        await finalizeGame(roomCode)
         return
     }
 
@@ -25,11 +25,10 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
         const [questionId, questionTimeout, openedAt] = setting
 
         getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.CURRENT_QUESTION_ADVANCED, {
-            id: questionId, 
+            id: questionId,
             timeout: questionTimeout,
             openedAt
         })
-        console.log("[GAME FLOW] current question data sended")
 
         const job = await gameFlowQueue.add(gameQueueJobKeys.ADVANCE_GAME, {
             roomCode: roomCode,
@@ -51,7 +50,6 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
         } as BullmqJobDataType['advanceGame'], {
             delay: questionTimeout * 1000
         })
-        console.log("the job i just added will be executed at -> ", job.timestamp + (job.opts.delay ?? 0))
 
     }
 

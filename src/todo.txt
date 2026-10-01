@@ -1,0 +1,3 @@
+1
+    togliere punti a chi di dovere quando il quiz finisce e si deve mandare a tutti i client il resoconto finale
+    sottrarre punti, in particolare, a chi non ha risposto a qualche domanda.

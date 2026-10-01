@@ -83,42 +83,43 @@ if not result then
 end
 
 local function calculateScoreDelta(question, inputAnswer, sentAt)
-    local delta = 0
     local type = question.type
-
-    if type == 1 then
-        return delta
-    end
-
     local correctAnswer = question.answers
-    
+
     if type == 0 then
         if inputAnswer == correctAnswer[1] then
-            delta = delta + 100
-        else 
-            delta = delta - 45
+            return 100
         end
     elseif type == 2 then
-        for _, optionSelected in ipairs(inputAnswer) do
-            local isCorrect = false
 
-            for _, singleCorrectAnswer in ipairs(correctAnswer) do
-                if optionSelected == singleCorrectAnswer then
-                    isCorrect = true
+        if #inputAnswer ~= #correctAnswer then
+            return 0
+        end
+
+        local correctsSelected = 0
+
+        for _, selectedOpt in ipairs(inputAnswer) do
+            local isCorr = false
+
+            for _, corrAnswer in ipairs(correctAnswer) do
+                if selectedOpt == corrAnswer then
+                    isCorr = true
                     break
                 end
             end
 
-            if not isCorrect then
-                delta = 0
-                break
+            if isCorr then
+                correctsSelected = correctsSelected + 1
             end
+        end
 
-            delta = delta + 100
+        if correctsSelected == #correctAnswer then
+            return 100
         end
     end
 
-    return delta
+    return 0
+
 end
 
 local scoreDelta = calculateScoreDelta(questionFromSnapshot, answer, sentAt)

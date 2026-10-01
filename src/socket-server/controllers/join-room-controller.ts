@@ -26,25 +26,10 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         const added = await addPlayer(room, { username, socketId: socket.id, playerId, score: 0 })
 
         if ((added === "ROOM_NOT_FOUND") || (added === "MAX_CANDIDATES") || (added === "ALREADY_JOINED") || (added === "GAME_ALREADY_STARTED")) {
-            /*
-            null = Stanza non trovata
-            */
             return
         }
 
         const [candidate, players] = added
-
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log("DEBUG")
-        console.log(added)
 
         socket.data.room = room
         socket.data.username = candidate

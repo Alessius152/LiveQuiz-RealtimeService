@@ -4,7 +4,7 @@ import { answerQuestionSchema } from "../schemas.js"
 import { isPlayerAnsweringTokenValidationError, verifyPlayerAnsweringToken } from "../../utils/tokens/validation.js"
 import { registerPlayerAnswer } from "../../temporarly-database/rooms-management.js"
 
-const handleAnswerSentController = async (socket: Socket, data: unknown, ack: (response: unknown) => void) => {
+const handleAnswerSentController = async (socket: Socket, data: unknown) => {
 
     const validation = answerQuestionSchema.safeParse(data)
     if (!validation.success) {
@@ -30,8 +30,6 @@ const handleAnswerSentController = async (socket: Socket, data: unknown, ack: (r
     ) {
         return
     }
-
-    ack({ accepted: true, answeredAt: result })
 
 }
 

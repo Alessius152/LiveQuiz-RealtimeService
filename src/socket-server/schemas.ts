@@ -18,7 +18,9 @@ const answerQuestionSchema = zod.object({
     answer: zod.union([
         zod.number(),
         zod.string(),
-        zod.array(zod.number()).nonempty()
+        zod.array(zod.number()).nonempty().refine(values => new Set(values).size === values.length, {
+            error: "must specify only unique option indexes"
+        })
     ])
 })
 

@@ -18,7 +18,7 @@ if currentQuestion == nil or currentQuestion == cjson.null then
     local questionTimeout = cjson.decode(questionTimeoutJSON)[1]
 
     if questionTimeout == nil then
-        questionTimeout = 60
+        questionTimeout = 5
     end
 
     local redisTime = redis.call("time")
@@ -63,7 +63,7 @@ local questionTimeoutJSON = redis.call("json.get", room, "$.immutableQuizSnapsho
 local questionTimeout = cjson.decode(questionTimeoutJSON)[1]
 
 if questionTimeout == nil then
-    questionTimeout = 60
+    questionTimeout = 5
 end
 
 local redisTime = redis.call("time")
