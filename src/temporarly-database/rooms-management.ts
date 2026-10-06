@@ -36,6 +36,9 @@ const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | Realt
             questionsOrder,
             currentQuestion: null,
             answersHistory: {},
+            quizSnapshotMetadata: {
+                version: qSnapshot[0].quiz[2]
+            }
         }
         const result = await redisCluster.json.set(key, "$", roomStatus, { NX: true })
 
@@ -47,7 +50,8 @@ const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | Realt
 
     }
 
-    throw new Error('', { cause: 'max_attempts_reached' })
+    throw new Error('', { cause: 'max_attempts_reached' }) /*questo errore si verficia solo se lo sfortunato caso del
+    codice già generato si verifica per {maxAttempts} volte di fila*/
 
 }
 
