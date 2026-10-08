@@ -7,10 +7,10 @@ import { quizKey } from "./redis-keys-generators.js"
 
 const saveQuiz = async (quizStruct: CachedExistantQuiz) => {
     const data = {
-        metadata: quizStruct.quiz,
+        metadata: quizStruct.metadata,
         questions: quizStruct.questions
     }
-    await redisCluster.json.set(quizKey(quizStruct.quiz[1]), "$", data)
+    await redisCluster.json.set(quizKey(quizStruct.metadata[1]), "$", data)
 }
 
 const checkQuizExists = async (quizId: string): Promise<boolean> => {

@@ -28,8 +28,8 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
         if ((added === "ROOM_NOT_FOUND") || (added === "MAX_CANDIDATES") || (added === "ALREADY_JOINED") || (added === "GAME_ALREADY_STARTED")) {
             return
         }
-
-        const [candidate, players] = added
+        
+        const [ candidate, membersList, snapshotId, snapshotVersion ] = added
 
         socket.data.room = room
         socket.data.username = candidate
@@ -62,7 +62,8 @@ const joinRoomController = async (socket: Socket, data: unknown) => {
                 reconnection: reconnectionToken,
                 answering: answeringToken
             },
-            membersList: JSON.parse(players)
+            membersList: JSON.parse(membersList),
+            quizData: [snapshotId, snapshotVersion]
         })
     }
     else {

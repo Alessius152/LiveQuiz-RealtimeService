@@ -37,7 +37,8 @@ const loadNewRoom: (quizId: string) => Promise<"QUIZ_SNAPSHOT_NOT_FOUND" | Realt
             currentQuestion: null,
             answersHistory: {},
             quizSnapshotMetadata: {
-                version: qSnapshot[0].quiz[2]
+                id: qSnapshot[0].metadata[1],
+                version: qSnapshot[0].metadata[2]
             }
         }
         const result = await redisCluster.json.set(key, "$", roomStatus, { NX: true })
@@ -79,7 +80,8 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 }
 
 const addPlayer = async (room: string, player: PlayerStatus): Promise<
-    "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED" | [string, string] /*nome con il quale entro; lista degli utenti già dentro*/
+    "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED" 
+    | [string,string,string,string]/*candidated username, membersList, quiz id, quiz version*/
 > => {
     return await redisCluster.eval(ADD_PLAYER_SCRIPT, {
         keys: [roomKey(room)],

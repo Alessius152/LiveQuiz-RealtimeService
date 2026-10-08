@@ -8,7 +8,7 @@ type QuestionContent = {
 }
 
 type ParsedCreatedQuizEventPayload = {
-    quiz: CreatedQuizEvent['quiz']
+    metadata: CreatedQuizEvent['quiz']
     questions: Record<number, QuestionContent>
 }
 

@@ -1,4 +1,4 @@
-import { QuizVersion } from "./kafka-events.js"
+import { QuizUuid, QuizVersion } from "./kafka-events.js"
 import { ParsedCreatedQuizEventPayload } from "./quizzes-storage.js"
 
 type PlayerStatus = {
@@ -14,6 +14,7 @@ type RealtimeRoomStatus = {
     code: string,
     immutableQuizSnapshot: ImmutableQuizSnapshot['questions'],
     quizSnapshotMetadata: {
+        id: QuizUuid,
         version: QuizVersion
     },
     status: 'waiting' | 'running',

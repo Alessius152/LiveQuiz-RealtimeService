@@ -26,7 +26,7 @@ const parseQuestionsIndexing = (
 }
 
 const onCreateQuizEvent = ({ quiz, indexing }: CreatedQuizEvent) => {
-    saveQuiz({ quiz, questions: parseQuestionsIndexing(indexing) })
+    saveQuiz({ metadata: quiz, questions: parseQuestionsIndexing(indexing) })
 }
 
 const onNewQuizVersionAvailableEvent = ({ quizId, releaseNumber, addedQuestions }: QuizNewVersionAvailableEvent) => {
