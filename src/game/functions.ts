@@ -1,3 +1,5 @@
+import { uuidv7 } from "uuidv7"
+import { kafkaTopics, producer } from "../config/kafka.js"
 import { getIO } from "../global/ioInstance.js"
 import { socketIoEvents, socketIoRooms } from "../socket-server/socket.io-keys-generators.js"
 import { advanceCurrentQuestion, finalizeGame } from "../temporarly-database/rooms-management.js"
@@ -15,14 +17,38 @@ const advanceGame = async (roomCode: string, expectedCurrentQuestion: null | num
 
     if (setting === 'QUIZ_FINISHED') {
         getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.QUIZ_FINISHED)
-        
-        await finalizeGame(roomCode)
+
+        const finalization = await finalizeGame(roomCode)
+
+        if (
+            (finalization === "GAME_ALREADY_FINALIZED")
+            || (finalization === "GAME_NOT_FINISHED")
+            || (finalization === "ROOM_NOT_FOUND")
+        ) {
+            return
+        }
+
+        getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.GAME_FINALIZED, finalization)
+
+        await producer.send({
+            topic: kafkaTopics.ANALYTICS_TOPIC,
+            messages: [{
+                key: roomCode,
+                value: JSON.stringify({
+                    eventId: uuidv7(),
+                    eventType: 'GAME_FINISHED',
+                    gameId: roomCode
+                })
+            }]
+        })
         return
     }
 
     if (Array.isArray(setting)) {
 
         const [questionId, questionTimeout, openedAt] = setting
+        console.log("TIME REDIS", openedAt)
+        console.log("TIME NODEJS", Date.now())
 
         getIO().to(socketIoRooms.quizRoom(roomCode)).emit(socketIoEvents.CURRENT_QUESTION_ADVANCED, {
             id: questionId,

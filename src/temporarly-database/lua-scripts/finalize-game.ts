@@ -50,7 +50,18 @@ for _, questionId in ipairs(questionsOrder) do
 end
 
 redis.call("json.set", roomKey, "$.status", '"finalized"')
-return "OK"
+
+local playersFinalData = cjson.decode(
+    redis.call("json.get", roomKey, "$.players")
+)[1]
+
+local scores = {}
+for _, player in ipairs(playersFinalData) do
+    table.insert(scores, {player.username, player.score})
+end
+
+return cjson.encode(scores)
+
 `
 
 export default FINALIZE_GAME_SCRIPT

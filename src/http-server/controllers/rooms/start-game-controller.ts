@@ -5,6 +5,8 @@ import { isHostTokenValidationError, verifyHostToken } from "../../../utils/toke
 import { setRoomStatusAsRunning } from "../../../temporarly-database/rooms-management.js"
 import { socketIoEvents, socketIoRooms } from "../../../socket-server/socket.io-keys-generators.js"
 import { advanceGame } from "../../../game/functions.js"
+import { kafkaTopics, producer } from "../../../config/kafka.js"
+import { uuidv7 } from "uuidv7"
 
 
 const startGameController: RouteHandlerMethod = async (request, reply) => {
@@ -31,6 +33,17 @@ const startGameController: RouteHandlerMethod = async (request, reply) => {
         console.log("[GAME FLOW] game-started sended 2")
         await advanceGame(tokenCheck.room, null)
 
+        await producer.send({
+            topic: kafkaTopics.ANALYTICS_TOPIC,
+            messages: [{
+                key: tokenCheck.room,
+                value: JSON.stringify({
+                    eventId: uuidv7(),
+                    eventType: 'GAME_STARTED',
+                    gameId: tokenCheck.room
+                })
+            }]
+        })
         reply.status(HttpStatusCode.OK).send({})
     }
     catch (err) {

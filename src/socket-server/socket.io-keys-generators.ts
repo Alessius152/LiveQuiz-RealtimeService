@@ -11,7 +11,8 @@ const socketIoEvents = {
     CURRENT_QUESTION_ADVANCED: 'current-question-advanced',
     ANSWER_SENT: 'answer-sent',
     NEW_PLAYER_JOINED: 'new-player-joined',
-    MEMBER_DISCONNECTED: 'member-disconnected'
+    MEMBER_DISCONNECTED: 'member-disconnected',
+    GAME_FINALIZED: 'game-finalized'
 }
 
 export {

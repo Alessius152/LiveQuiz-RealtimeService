@@ -80,8 +80,8 @@ const getRoom = async (code: string): Promise<RealtimeRoomStatus | null> => {
 }
 
 const addPlayer = async (room: string, player: PlayerStatus): Promise<
-    "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED" 
-    | [string,string,string,string]/*candidated username, membersList, quiz id, quiz version*/
+    "ROOM_NOT_FOUND" | "ALREADY_JOINED" | "MAX_CANDIDATES" | "GAME_ALREADY_STARTED"
+    | [string, string, string, string]/*candidated username, membersList, quiz id, quiz version*/
 > => {
     return await redisCluster.eval(ADD_PLAYER_SCRIPT, {
         keys: [roomKey(room)],
@@ -133,25 +133,12 @@ const registerPlayerAnswer = async (room: string, socketId: string, playerId: st
 }
 
 const finalizeGame = async (room: string): Promise<
-    any
+    "ROOM_NOT_FOUND" | "GAME_ALREADY_FINALIZED" | "GAME_NOT_FINISHED"
+    | Array<[string, number]> /*array di [username, score]*/
 > => {
-    console.log("[][]")
-    console.log("[][]")
-    console.log("[][]")
-    console.log("[][]")
-    console.log("[][]")
-    console.log("[][]")
-    try {
-        console.log("BEFORE EVAL")
-
-        const result = await redisCluster.eval(FINALIZE_GAME_SCRIPT, {
-            keys: [roomKey(room)]
-        })
-
-        console.log("AFTER EVAL", result)
-    } catch (err) {
-        console.error("FINALIZE EVAL ERROR:", err)
-    }
+    return await redisCluster.eval(FINALIZE_GAME_SCRIPT, {
+        keys: [roomKey(room)]
+    }) as any
 }
 
 export {
