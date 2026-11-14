@@ -17,7 +17,7 @@ type RealtimeRoomStatus = {
         id: QuizUuid,
         version: QuizVersion
     },
-    status: 'waiting' | 'running',
+    status: 'waiting' | 'running' | 'finalized',
     players: Array<PlayerStatus>,
     questionsOrder: Array<number> /*questo array semplicemente spiega
     l'ordine in cui le domande verranno estratte.
@@ -28,7 +28,10 @@ type RealtimeRoomStatus = {
         id: number,
         openedAt: number, /*serve a calcolare quanto ci mette un player a rispondere a una domanda*/
     } /*indica la domanda corrente*/,
-    answersHistory: Record<number, Record<string, Array<number> | number | string>> /*
+    answersHistory: Record<number, Record<string, {
+        answer: Array<number> | number | string,
+        answeredAt: number,
+    }>> /*
     l'idea è che io voglio una struttura del genere:
     {
         [id_domanda_1]: {

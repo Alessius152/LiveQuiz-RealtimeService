@@ -1,0 +1,136 @@
+name: livequiz_RTservice_rediscluster
+
+services:
+    livequiz-RTservice-rediscluster-1:
+        image: redis/redis-stack-server:latest
+        container_name: livequiz-RTservice-rediscluster-1
+        command: redis-server /usr/local/etc/redis/redis.conf --cluster-announce-hostname livequiz-RTservice-rediscluster-1 --cluster-preferred-endpoint-type hostname
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - redis-data-1:/data
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+    livequiz-RTservice-rediscluster-2:
+        image: redis/redis-stack-server:latest
+        container_name: livequiz-RTservice-rediscluster-2
+        command: redis-server /usr/local/etc/redis/redis.conf --cluster-announce-hostname livequiz-RTservice-rediscluster-2 --cluster-preferred-endpoint-type hostname
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - redis-data-2:/data
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+    livequiz-RTservice-rediscluster-3:
+        image: redis/redis-stack-server:latest
+        container_name: livequiz-RTservice-rediscluster-3
+        command: redis-server /usr/local/etc/redis/redis.conf --cluster-announce-hostname livequiz-RTservice-rediscluster-3 --cluster-preferred-endpoint-type hostname
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - redis-data-3:/data
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+    livequiz-RTservice-rediscluster-4:
+        image: redis/redis-stack-server:latest
+        container_name: livequiz-RTservice-rediscluster-4
+        command: redis-server /usr/local/etc/redis/redis.conf --cluster-announce-hostname livequiz-RTservice-rediscluster-4 --cluster-preferred-endpoint-type hostname
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - redis-data-4:/data
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+    livequiz-RTservice-rediscluster-5:
+        image: redis/redis-stack-server:latest
+        container_name: livequiz-RTservice-rediscluster-5
+        command: redis-server /usr/local/etc/redis/redis.conf --cluster-announce-hostname livequiz-RTservice-rediscluster-5 --cluster-preferred-endpoint-type hostname
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - redis-data-5:/data
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+    livequiz-RTservice-rediscluster-6:
+        image: redis/redis-stack-server:latest
+        container_name: livequiz-RTservice-rediscluster-6
+        command: redis-server /usr/local/etc/redis/redis.conf --cluster-announce-hostname livequiz-RTservice-rediscluster-6 --cluster-preferred-endpoint-type hostname
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - redis-data-6:/data
+        networks:
+            - livequiz-realtimeservice-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+
+    redis-cluster-init:
+        image: redis/redis-stack-server:latest
+        depends_on:
+            livequiz-RTservice-rediscluster-1:
+                condition: service_healthy
+            livequiz-RTservice-rediscluster-2:
+                condition: service_healthy
+            livequiz-RTservice-rediscluster-3:
+                condition: service_healthy
+            livequiz-RTservice-rediscluster-4:
+                condition: service_healthy
+            livequiz-RTservice-rediscluster-5:
+                condition: service_healthy
+            livequiz-RTservice-rediscluster-6:
+                condition: service_healthy
+        networks:
+            - livequiz-realtimeservice-net
+        command: >
+            redis-cli --cluster create
+            livequiz-RTservice-rediscluster-1:6379
+            livequiz-RTservice-rediscluster-2:6379
+            livequiz-RTservice-rediscluster-3:6379
+            livequiz-RTservice-rediscluster-4:6379
+            livequiz-RTservice-rediscluster-5:6379
+            livequiz-RTservice-rediscluster-6:6379
+            --cluster-replicas 1
+            --cluster-yes
+
+volumes:
+    redis-data-1:
+    redis-data-2:
+    redis-data-3:
+    redis-data-4:
+    redis-data-5:
+    redis-data-6:
+
+networks:
+    livequiz-realtimeservice-net:
+        driver: bridge
+        name: livequiz-realtimeservice-net
+        ipam:
+            config:
+                - subnet: 172.32.0.0/16

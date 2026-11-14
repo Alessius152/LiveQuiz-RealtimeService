@@ -25,12 +25,12 @@ const parseQuestionsIndexing = (
     return parsed
 }
 
-const onCreateQuizEvent = ({ quiz, indexing }: CreatedQuizEvent) => {
-    saveQuiz({ metadata: quiz, questions: parseQuestionsIndexing(indexing) })
+const onCreateQuizEvent = async ({ quiz, indexing }: CreatedQuizEvent) => {
+    await saveQuiz({ metadata: quiz, questions: parseQuestionsIndexing(indexing) })
 }
 
-const onNewQuizVersionAvailableEvent = ({ quizId, releaseNumber, addedQuestions }: QuizNewVersionAvailableEvent) => {
-    updateQuiz({ quizId, releaseNumber, addedQuestions })
+const onNewQuizVersionAvailableEvent = async ({ quizId, releaseNumber, addedQuestions }: QuizNewVersionAvailableEvent) => {
+    await updateQuiz({ quizId, releaseNumber, addedQuestions })
 }
 
 export default ({
